@@ -221,10 +221,9 @@ class ChildItem extends StatelessWidget {
 }
 
 class SearchResults extends StatelessWidget {
-  String search;
 
-  SearchResults(String search) {
-    this.search = search;
+  SearchResults(String query) {
+    currentProductName = query;
   }
 
 
