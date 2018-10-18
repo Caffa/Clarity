@@ -36,14 +36,14 @@ class ResultsWidget extends StatelessWidget {
 
   Widget _buildBodyImage() {
     return new Container(
-      alignment: Alignment.bottomLeft,
-      padding: new EdgeInsets.only(left: 16.0, bottom: 8.0),
-      decoration: new BoxDecoration(
-        image: new DecorationImage(
-          image: new AssetImage('assets/$currentProductImage.jpg'),
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
+        child: new OverflowBox(
+          minWidth: 0.0, 
+          minHeight: 0.0,
+          maxHeight: double.infinity, 
+          // maxWidth: double.infinity, 
+          child: new Image(
+            image: new AssetImage('assets/$currentProductImage.jpg'), 
+            fit: BoxFit.cover)) 
+      );
   }
 }
