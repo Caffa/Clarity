@@ -101,7 +101,8 @@ class _FeedbackState extends State<Feedback> {
             ),
           ),
           new Divider(),
-          new Text("Thanks for the feedback!"),
+          new Text("Thanks for the feedback!",
+              style: new TextStyle(fontSize: 16.0)),
         ],
       ),
     );
