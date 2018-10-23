@@ -134,8 +134,6 @@ class _FeedbackState extends State<Feedback> {
     notes = await db.getAllNotes();
     notes.forEach((note) => print(note));
 
-    //await db.close();
-
     Navigator.pop(context);
   }
 }
