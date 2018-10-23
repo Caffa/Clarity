@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async' show Future;
 import 'package:flutter/services.dart' show rootBundle;
 import 'results.dart';
+import 'feedback.dart';
 
 final TextEditingController searchQuery = new TextEditingController();
 
@@ -61,10 +62,6 @@ class SearchPageState extends State<SearchPage> {
     try {
       String body = await loadAsset();
       List<String> items = body.split("`");
-      /*for (String i in items) {
-        print(i);
-        print(i.length);
-      }*/
       return items;
     } catch (e) {
       return null;
@@ -108,39 +105,45 @@ class SearchPageState extends State<SearchPage> {
   }
 
   Widget buildBar(BuildContext context) {
-    return new AppBar(centerTitle: true, title: appBarTitle, backgroundColor: new Color(0xffb86b77), actions: <Widget>[
-      new IconButton(
-        icon: Icon(Icons.search),
-        onPressed: () {
-          setState(() {
-            if (this.actionIcon.icon == Icons.search) {
-              this.appBarTitle = new Stack(
-                  alignment: const Alignment(1.0, 1.0),
-                  children: <Widget>[
-                    new TextField(
-                      controller: searchQuery,
-                      style: new TextStyle(
-                        color: Colors.white,
-                      ),
-                      decoration: new InputDecoration(
-                          hintText: "Search...",
-                          hintStyle: new TextStyle(color: Colors.white)),
-                    ),
-                    new FlatButton(
-                        textColor: Colors.white,
-                        onPressed: () {
-                          _handleSearchEnd();
-                        },
-                        child: new Icon(Icons.clear))
-                  ]);
-              _handleSearchStart();
-            } else {
-              _handleSearchSend();
-            }
-          });
-        },
-      ),
-    ]);
+    return new AppBar(
+        centerTitle: true,
+        title: appBarTitle,
+        backgroundColor: new Color(0xffb86b77),
+        actions: <Widget>[
+          new IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              setState(() {
+                if (this.actionIcon.icon == Icons.search) {
+                  this.appBarTitle = new Stack(
+                      alignment: const Alignment(1.0, 1.0),
+                      children: <Widget>[
+                        new TextField(
+                          controller: searchQuery,
+                          style: new TextStyle(
+                            color: Colors.white,
+                          ),
+                          decoration: new InputDecoration(
+                              hintText: "Search...",
+                              hintStyle: new TextStyle(color: Colors.white)),
+                        ),
+                        new FlatButton(
+                            textColor: Colors.white,
+                            onPressed: () {
+                              _handleSearchEnd();
+                            },
+                            child: new Icon(Icons.clear))
+                      ]);
+                  _handleSearchStart();
+                } else {
+                  _handleSearchSend();
+                }
+              });
+            },
+          ),
+          new IconButton(
+              icon: Icon(Icons.feedback), onPressed: _handleFeedback),
+        ]);
   }
 
   void _handleSearchStart() {
@@ -166,6 +169,13 @@ class SearchPageState extends State<SearchPage> {
       MaterialPageRoute(builder: (context) => ResultsPage(searchQuery.text)),
     );
   }
+
+  void _handleFeedback() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => FeedbackPage()),
+    );
+  }
 }
 
 class ChildItem extends StatelessWidget {
@@ -176,9 +186,10 @@ class ChildItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new ListTile(
-        title: new Text(this.name, style: new TextStyle(
-          color: new Color(0xffb86b77),
-        )),
+        title: new Text(this.name,
+            style: new TextStyle(
+              color: new Color(0xffb86b77),
+            )),
         onTap: () {
           searchQuery.text = this.name;
         });
