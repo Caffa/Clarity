@@ -38,10 +38,11 @@ class _FeedbackState extends State<Feedback> {
               })
         ],
       ),
-      body: new Column(
+      body: new ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.all(20.0),
         children: <Widget>[
-          new Divider(height: 35.0),
-          new Text('Do you want/need such an app?',
+          new Text('Do you want or need such an app?',
               style: new TextStyle(fontSize: 16.0)),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -72,7 +73,7 @@ class _FeedbackState extends State<Feedback> {
               ),
             ],
           ),
-          new Divider(height: 35.0),
+          new Divider(),
           new Text('Rate your experience',
               style: new TextStyle(fontSize: 16.0)),
           new StarRating(
@@ -87,7 +88,7 @@ class _FeedbackState extends State<Feedback> {
                   },
                 ),
           ),
-          new Divider(height: 35.0),
+          new Divider(),
           new ListTile(
             leading: const Icon(Icons.rate_review),
             title: new TextField(
@@ -95,11 +96,11 @@ class _FeedbackState extends State<Feedback> {
               maxLines: null,
               controller: review,
               decoration: new InputDecoration(
-                hintText: "What was good, bad or can be improved",
+                hintText: "Share your thoughts",
               ),
             ),
           ),
-          new Divider(height: 35.0),
+          new Divider(),
           new Text("Thanks for the feedback!"),
         ],
       ),
