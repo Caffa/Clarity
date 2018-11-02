@@ -37,13 +37,12 @@ class ResultsWidget extends StatelessWidget {
   Widget _buildBodyImage() {
     return new Container(
         child: new OverflowBox(
-          minWidth: 0.0, 
-          minHeight: 0.0,
-          maxHeight: double.infinity, 
-          // maxWidth: double.infinity, 
-          child: new Image(
-            image: new AssetImage('assets/$currentProductImage.jpg'), 
-            fit: BoxFit.cover)) 
-      );
+            minWidth: 0.0,
+            minHeight: 0.0,
+            maxHeight: double.infinity,
+            // maxWidth: double.infinity,
+            child: new Image(
+                image: new AssetImage('assets/$currentProductImage.jpg'),
+                fit: BoxFit.cover)));
   }
 }

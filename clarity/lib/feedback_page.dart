@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'database_helper.dart';
-import 'note.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FeedbackPage extends StatelessWidget {
   @override
@@ -18,12 +17,9 @@ class Feedback extends StatefulWidget {
 }
 
 class _FeedbackState extends State<Feedback> {
-  double rating = 3.5;
-  int starCount = 5;
+  int preference = 0;
+  int rating = 3;
   TextEditingController review = new TextEditingController();
-
-  int radioValue = 0;
-  String preference = '';
 
   @override
   Widget build(BuildContext context) {
@@ -49,24 +45,24 @@ class _FeedbackState extends State<Feedback> {
             children: <Widget>[
               new Radio(
                 value: 0,
-                groupValue: radioValue,
-                onChanged: _handleRadioValueChange,
+                groupValue: preference,
+                onChanged: _handlePreference,
               ),
               new Text(
                 'want',
               ),
               new Radio(
                 value: 1,
-                groupValue: radioValue,
-                onChanged: _handleRadioValueChange,
+                groupValue: preference,
+                onChanged: _handlePreference,
               ),
               new Text(
                 'need',
               ),
               new Radio(
                 value: 2,
-                groupValue: radioValue,
-                onChanged: _handleRadioValueChange,
+                groupValue: preference,
+                onChanged: _handlePreference,
               ),
               new Text(
                 'not at all',
@@ -81,7 +77,7 @@ class _FeedbackState extends State<Feedback> {
             rating: rating,
             color: Colors.orange,
             borderColor: Colors.grey,
-            starCount: starCount,
+            starCount: 5,
             onRatingChanged: (rating) => setState(
                   () {
                     this.rating = rating;
@@ -101,50 +97,39 @@ class _FeedbackState extends State<Feedback> {
             ),
           ),
           new Divider(),
-          new Text("Thanks for the feedback!",
-              style: new TextStyle(fontSize: 16.0)),
+          new Text(
+            "Thanks for the feedback!\n© 2018 Clarity by Slyfe",
+            style: new TextStyle(fontSize: 16.0),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
   }
 
-  void _handleRadioValueChange(int value) {
-    setState(() {
-      radioValue = value;
-
-      switch (radioValue) {
-        case 0:
-          preference = 'want';
-          break;
-        case 1:
-          preference = 'need';
-          break;
-        case 2:
-          preference = 'not at all';
-          break;
-      }
-    });
-  }
-
   Future submit() async {
-    List notes;
-    var db = new DatabaseHelper();
-
-    await db.saveNote(new Note(preference, rating.toString(), review.text));
-
-    print('=== getAllNotes() ===');
-    notes = await db.getAllNotes();
-    notes.forEach((note) => print(note));
+    var map = new Map<String, dynamic>();
+    map['preference'] = preference;
+    map['rating'] = rating;
+    map['review'] = review.text;
+    map['timestamp'] = new Timestamp.now();
+    Firestore.instance.collection('Feedback').add(map);
 
     Navigator.pop(context);
   }
+
+  void _handlePreference(int value) {
+    setState(() {
+      preference = value;
+    });
+  }
 }
 
-typedef void RatingChangeCallback(double rating);
+typedef void RatingChangeCallback(int rating);
 
 class StarRating extends StatelessWidget {
   final int starCount;
-  final double rating;
+  final int rating;
   final RatingChangeCallback onRatingChanged;
   final Color color;
   final Color borderColor;
@@ -152,7 +137,7 @@ class StarRating extends StatelessWidget {
 
   StarRating(
       {this.starCount = 5,
-      this.rating = .0,
+      this.rating = 0,
       this.onRatingChanged,
       this.color,
       this.borderColor,
@@ -169,12 +154,6 @@ class StarRating extends StatelessWidget {
         color: borderColor ?? Theme.of(context).buttonColor,
         size: size ?? ratingStarSizeRelativeToScreen,
       );
-    } else if (index > rating - 1 && index < rating) {
-      icon = new Icon(
-        Icons.star_half,
-        color: color ?? Theme.of(context).primaryColor,
-        size: size ?? ratingStarSizeRelativeToScreen,
-      );
     } else {
       icon = new Icon(
         Icons.star,
@@ -185,8 +164,7 @@ class StarRating extends StatelessWidget {
     return new InkResponse(
       highlightColor: Colors.transparent,
       radius: (size ?? ratingStarSizeRelativeToScreen) / 2,
-      onTap:
-          onRatingChanged == null ? null : () => onRatingChanged(index + 1.0),
+      onTap: onRatingChanged == null ? null : () => onRatingChanged(index + 1),
       child: new Container(
         height: (size ?? ratingStarSizeRelativeToScreen) * 1.5,
         child: icon,

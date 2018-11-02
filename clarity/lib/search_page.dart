@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async' show Future;
 import 'package:flutter/services.dart' show rootBundle;
-import 'results.dart';
-import 'feedback.dart';
+import 'results_page.dart';
+import 'feedback_page.dart';
 
 final TextEditingController searchQuery = new TextEditingController();
 
@@ -26,19 +26,16 @@ class SearchPageState extends State<SearchPage> {
 
   List<String> list;
   bool isSearching;
-  String searchText = "";
 
   SearchPageState() {
     searchQuery.addListener(() {
       if (searchQuery.text.isEmpty) {
         setState(() {
           isSearching = false;
-          searchText = "";
         });
       } else {
         setState(() {
           isSearching = true;
-          searchText = searchQuery.text;
         });
       }
     });
@@ -79,24 +76,47 @@ class SearchPageState extends State<SearchPage> {
             appBar: buildBar(context),
             body: new ListView(
               padding: new EdgeInsets.symmetric(vertical: 8.0),
-              children: isSearching ? buildSearchList() : buildList(),
+              //children: isSearching ? buildSearchList() : buildList(),
+              children: isSearching ? buildSearchList() : buildHomePage(),
+              scrollDirection: isSearching ? Axis.vertical : Axis.horizontal,
             ),
           ),
         ));
   }
 
-  List<ChildItem> buildList() {
-    return list.map((contact) => new ChildItem(contact)).toList();
+  List<Widget> buildHomePage() {
+    return <Widget>[
+      Container(
+        width: 160.0,
+        color: Colors.red,
+      ),
+      Container(
+        width: 160.0,
+        color: Colors.blue,
+      ),
+      Container(
+        width: 160.0,
+        color: Colors.green,
+      ),
+      Container(
+        width: 160.0,
+        color: Colors.yellow,
+      ),
+      Container(
+        width: 160.0,
+        color: Colors.orange,
+      ),
+    ];
   }
 
   List<ChildItem> buildSearchList() {
-    if (searchText.isEmpty) {
+    if (searchQuery.text.isEmpty) {
       return list.map((contact) => new ChildItem(contact)).toList();
     } else {
       List<String> searchList = List();
       for (int i = 0; i < list.length; i++) {
         String item = list.elementAt(i);
-        if (item.toLowerCase().contains(searchText.toLowerCase())) {
+        if (item.toLowerCase().contains(searchQuery.text.toLowerCase())) {
           searchList.add(item);
         }
       }
@@ -111,7 +131,7 @@ class SearchPageState extends State<SearchPage> {
         backgroundColor: new Color(0xffb86b77),
         actions: <Widget>[
           new IconButton(
-            icon: Icon(Icons.search),
+            icon: actionIcon,
             onPressed: () {
               setState(() {
                 if (this.actionIcon.icon == Icons.search) {
@@ -127,12 +147,12 @@ class SearchPageState extends State<SearchPage> {
                               hintText: "Search...",
                               hintStyle: new TextStyle(color: Colors.white)),
                         ),
-                        new FlatButton(
-                            textColor: Colors.white,
-                            onPressed: () {
-                              _handleSearchEnd();
-                            },
-                            child: new Icon(Icons.clear))
+                        new IconButton(
+                          icon: Icon(Icons.clear),
+                          onPressed: () {
+                            _handleSearchEnd();
+                          },
+                        )
                       ]);
                   _handleSearchStart();
                 } else {
@@ -148,7 +168,6 @@ class SearchPageState extends State<SearchPage> {
 
   void _handleSearchStart() {
     setState(() {
-      isSearching = true;
       this.actionIcon = new Icon(
         Icons.send,
         color: Colors.white,
@@ -159,18 +178,20 @@ class SearchPageState extends State<SearchPage> {
   void _handleSearchEnd() {
     setState(() {
       searchQuery.clear();
-      isSearching = false;
     });
   }
 
   void _handleSearchSend() {
+    String query = searchQuery.text;
+    _handleSearchEnd();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ResultsPage(searchQuery.text)),
+      MaterialPageRoute(builder: (context) => ResultsPage(query)),
     );
   }
 
   void _handleFeedback() {
+    _handleSearchEnd();
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => FeedbackPage()),
@@ -191,7 +212,11 @@ class ChildItem extends StatelessWidget {
               color: new Color(0xffb86b77),
             )),
         onTap: () {
-          searchQuery.text = this.name;
+          searchQuery.clear();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ResultsPage(this.name)),
+          );
         });
   }
 }

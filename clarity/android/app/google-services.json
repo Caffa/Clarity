@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "429262709746",
+    "firebase_url": "https://claritydb-ba97d.firebaseio.com",
+    "project_id": "claritydb-ba97d",
+    "storage_bucket": "claritydb-ba97d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:429262709746:android:86abf9c6b81ed678",
+        "android_client_info": {
+          "package_name": "com.example.clarity"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "429262709746-rgr5qce8ro4hn36h57r3uv17qehq1bon.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_X-AQ-1Y91pTbcMuq2zm43bD5_iosFHA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

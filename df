@@ -1,0 +1,160 @@
+[33mcommit 40b2c548c3d95c58aa67a49e4da337ed1ed98def[m[33m ([m[1;36mHEAD -> [m[1;32mbMaster[m[33m, [m[1;31morigin/iOSTestFlightPrep[m[33m, [m[1;32miOSTestFlightPrep[m[33m)[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 23 16:17:10 2018 +0800
+
+    Update feedback.dart
+
+[33mcommit ba95f576f7c6237616a3d911881ea6db2bf4d1a4[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 23 16:15:36 2018 +0800
+
+    Update feedback.dart
+
+[33mcommit 89442704d9d563238f16b24efd8bdc7db4015794[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 23 15:55:00 2018 +0800
+
+    Update feedback.dart
+
+[33mcommit 9a857a13ee1b8a423c83aad8413e92e6bbee1756[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 23 15:54:08 2018 +0800
+
+    Create database_helper.dart
+
+[33mcommit d8a92b3c6a0f73d12f108285464ea83a2e377ff2[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 23 15:53:41 2018 +0800
+
+    Create note.dart
+
+[33mcommit 44f507be00d75d8ffac4dce3d477afca8b085961[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 23 15:53:24 2018 +0800
+
+    Create feedback.dart
+
+[33mcommit 9c5b940b89923f578d27f71ab305cbd56003808d[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 23 15:52:59 2018 +0800
+
+    added sqlite dependency
+
+[33mcommit 76efcf1cc43faad6c65a0399e3e22cac13cb5c05[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 23 15:52:24 2018 +0800
+
+    added feedback icon
+
+[33mcommit e0a1858744e978c4425b13b015dc5fa0033f81a4[m
+Author: Caffa <wangyeelin@gmail.com>
+Date:   Fri Oct 19 01:24:50 2018 +0800
+
+    Guide to install app
+
+[33mcommit 6203d32193687f74d314f088ec6f398d2c4159f7[m
+Author: Unknown <wangyeelin@gmail.com>
+Date:   Fri Oct 19 01:19:13 2018 +0800
+
+    Working iOS
+    
+    Can run for iOS - set team & changed icons too
+
+[33mcommit ed484ac9c5a29ecb5b051de217950b64158f0653[m
+Author: Unknown <wangyeelin@gmail.com>
+Date:   Fri Oct 19 00:48:41 2018 +0800
+
+    Fixed Image Width Issue
+    
+    Fixed bug (iOS width overflow)
+
+[33mcommit 0c5addcdbec1f3ace9049b9641dbf3b4a194116f[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Thu Oct 18 21:49:45 2018 +0800
+
+    Add files via upload
+
+[33mcommit 1f3e46d24669519ec4d2e02f69b03f8d19f3ac7a[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Thu Oct 18 21:46:09 2018 +0800
+
+    Update pubspec.yaml
+
+[33mcommit fa83da701ab31d8fc43a687079ceb932d038b6c2[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Thu Oct 18 21:44:44 2018 +0800
+
+    Create search.dart
+
+[33mcommit 30ff6ad3c1c9874e6e9d9a50280003855d1b8f7e[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Thu Oct 18 21:44:27 2018 +0800
+
+    Create results.dart
+
+[33mcommit d0b719bd4dac41cefe2bc3580124051c83676101[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Thu Oct 18 21:44:01 2018 +0800
+
+    Update main.dart
+
+[33mcommit 96ae937d9fea77fa6f3caf67e4996f783916d3d9[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Thu Oct 18 21:43:39 2018 +0800
+
+    Update search_words.txt
+
+[33mcommit 6c62721903ff51b6d9f4b2e21c456ea4d46849c7[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Thu Oct 18 21:43:02 2018 +0800
+
+    Delete nil
+
+[33mcommit ce84264024770da1eb92332183054f1c92c204fd[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Thu Oct 18 21:42:15 2018 +0800
+
+    Create nil
+
+[33mcommit 64687ad4bc4dca40364199fea23af053015a78e9[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 16 18:41:52 2018 +0800
+
+    Create search_words.txt
+
+[33mcommit cb8e94ecb3512c2458505e9c02ac50b6a1db60bc[m
+Author: GioLim <gionnieve@hotmail.com>
+Date:   Tue Oct 16 18:41:17 2018 +0800
+
+    added search function
+
+[33mcommit 12dbeb36dbbc61482fe531c4e6b74ae28a65cfa7[m
+Merge: 726784d 89b5734
+Author: Caffa <wangyeelin@gmail.com>
+Date:   Mon Oct 15 11:58:22 2018 +0800
+
+    Merge pull request #1 from Caffa/ShowingResults
+    
+    Working - Simple List and SearchButton
+
+[33mcommit 89b5734d28b61b5ff3fb0f5f1681acc0b4f8464c[m[33m ([m[1;31morigin/ShowingResults[m[33m)[m
+Author: Unknown <wangyeelin@gmail.com>
+Date:   Mon Oct 15 11:56:55 2018 +0800
+
+    Working - Simple List and SearchButton
+    
+    The list view for each item can show title and subtitle - should expand later to show more complicated results & fix dummy data
+
+[33mcommit 726784d8e6f58f480301c94c9b80731c1a483907[m
+Author: Unknown <wangyeelin@gmail.com>
+Date:   Tue Oct 9 21:05:43 2018 +0800
+
+    Flutter
+    
+    basic version - working demo standard
+
+[33mcommit a92474fc2cf937d809bda0fd9f0ae064169005f4[m
+Author: Caffa <wangyeelin@gmail.com>
+Date:   Tue Oct 9 20:50:29 2018 +0800
+
+    Initial commit
