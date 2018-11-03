@@ -15,6 +15,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cloud_firestore: ^0.8.2+1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -38,6 +39,16 @@ flutter:
   
   assets:
     - assets/search_words.txt
+    - assets/Cosrx_Advanced_Snail_Mucin_96_Power_Essence.jpg
+    - assets/Scinic_Honey_AIO_Ampoule.jpg
+    - assets/Laneige_Eye_Sleeping_Mask.jpg
+    - assets/Klairs_Midnight_Blue_Calming_Cream.jpg
+    - assets/Biore_UV_Aqua_Rich_Watery_Essence.jpg
+    - assets/Cosrx_Honey_Ceramide_Full_Moisture_Cream.jpg
+    - assets/SK-II_Facial_treatment_essence.jpg
+    - assets/the_Ordinary_Buffet.jpg
+    - assets/Sulwhasoo_Gentle_Cleaning_Foam_EX.jpg
+    - assets/Hada_Labo_Hyaluronic_Acid_Lotion_Moist.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:
