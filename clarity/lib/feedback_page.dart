@@ -13,10 +13,10 @@ class FeedbackPage extends StatelessWidget {
 
 class Feedback extends StatefulWidget {
   @override
-  _FeedbackState createState() => new _FeedbackState();
+  FeedbackState createState() => new FeedbackState();
 }
 
-class _FeedbackState extends State<Feedback> {
+class FeedbackState extends State<Feedback> {
   int preference = 0;
   int rating = 3;
   TextEditingController review = new TextEditingController();

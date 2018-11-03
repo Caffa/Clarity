@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'search_page.dart';
 
-String currentProductName = "";
-
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {

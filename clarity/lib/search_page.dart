@@ -10,10 +10,10 @@ class SearchPage extends StatefulWidget {
   SearchPage({Key key}) : super(key: key);
 
   @override
-  SearchPageState createState() => new SearchPageState();
+  SearchState createState() => new SearchState();
 }
 
-class SearchPageState extends State<SearchPage> {
+class SearchState extends State<SearchPage> {
   Widget appBarTitle = new Text(
     "Search Clarity",
     style: new TextStyle(color: Colors.white),
@@ -27,7 +27,7 @@ class SearchPageState extends State<SearchPage> {
   List<String> list;
   bool isSearching;
 
-  SearchPageState() {
+  SearchState() {
     searchQuery.addListener(() {
       if (searchQuery.text.isEmpty) {
         setState(() {
@@ -88,30 +88,36 @@ class SearchPageState extends State<SearchPage> {
     return <Widget>[
       Container(
         width: 160.0,
-        color: Colors.red,
+        color: Colors.pink,
+        child: Image.network(
+          'https://github.com/flutter/website/blob/master/src/_includes/code/layout/lakes/images/lake.jpg?raw=true',
+        ),
       ),
       Container(
         width: 160.0,
-        color: Colors.blue,
+        color: Colors.white,
+        child: Image.network(
+          'https://images.ulta.com/is/image/Ulta/2521741?\$md\$',
+        ),
       ),
       Container(
         width: 160.0,
-        color: Colors.green,
+        color: Colors.pink,
       ),
       Container(
         width: 160.0,
-        color: Colors.yellow,
+        color: Colors.white,
       ),
       Container(
         width: 160.0,
-        color: Colors.orange,
+        color: Colors.pink,
       ),
     ];
   }
 
   List<ChildItem> buildSearchList() {
     if (searchQuery.text.isEmpty) {
-      return list.map((contact) => new ChildItem(contact)).toList();
+      return list.map((name) => new ChildItem(this, name)).toList();
     } else {
       List<String> searchList = List();
       for (int i = 0; i < list.length; i++) {
@@ -120,7 +126,7 @@ class SearchPageState extends State<SearchPage> {
           searchList.add(item);
         }
       }
-      return searchList.map((contact) => new ChildItem(contact)).toList();
+      return searchList.map((name) => new ChildItem(this, name)).toList();
     }
   }
 
@@ -156,7 +162,7 @@ class SearchPageState extends State<SearchPage> {
                       ]);
                   _handleSearchStart();
                 } else {
-                  _handleSearchSend();
+                  _handleSearchSend(searchQuery.text);
                 }
               });
             },
@@ -181,12 +187,11 @@ class SearchPageState extends State<SearchPage> {
     });
   }
 
-  void _handleSearchSend() {
-    String query = searchQuery.text;
+  void _handleSearchSend(String query) {
     _handleSearchEnd();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ResultsPage(query)),
+      MaterialPageRoute(builder: (context) => ResultsPage(title: 'Results', query: query)),
     );
   }
 
@@ -200,9 +205,10 @@ class SearchPageState extends State<SearchPage> {
 }
 
 class ChildItem extends StatelessWidget {
+  final SearchState state;
   final String name;
 
-  ChildItem(this.name);
+  ChildItem(this.state, this.name);
 
   @override
   Widget build(BuildContext context) {
@@ -213,10 +219,7 @@ class ChildItem extends StatelessWidget {
             )),
         onTap: () {
           searchQuery.clear();
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ResultsPage(this.name)),
-          );
+          state._handleSearchSend(this.name);
         });
   }
 }
