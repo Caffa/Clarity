@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async' show Future;
-import 'package:flutter/services.dart' show rootBundle;
 import 'results_page.dart';
 import 'feedback_page.dart';
 import 'background.dart';
@@ -23,7 +21,6 @@ class SearchState extends State<SearchPage> {
   );
   final key = new GlobalKey<ScaffoldState>();
 
-  List<String> list;
   bool isSearching;
 
   SearchState() {
@@ -44,24 +41,6 @@ class SearchState extends State<SearchPage> {
   void initState() {
     super.initState();
     isSearching = false;
-    list = List();
-    readData().then((l) {
-      list.addAll(l);
-    });
-  }
-
-  Future<String> loadAsset() async {
-    return await rootBundle.loadString('assets/search_words.txt');
-  }
-
-  Future<List<String>> readData() async {
-    try {
-      String body = await loadAsset();
-      List<String> items = body.split("`");
-      return items;
-    } catch (e) {
-      return null;
-    }
   }
 
   @override
@@ -76,7 +55,7 @@ class SearchState extends State<SearchPage> {
             appBar: buildBar(context),
             body: new Container(
               child: isSearching
-                  ? new ListView(children: buildSearchList())
+                  ? buildSearchList(context)
                   : buildHomePage(),
             ),
           ),
@@ -91,7 +70,11 @@ class SearchState extends State<SearchPage> {
 
   Widget _buildHoriBody(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('Test').snapshots(),
+      stream: Firestore.instance
+          .collection('Lipsticks')
+          .orderBy('rating')
+          .limit(10)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return LinearProgressIndicator();
 
@@ -175,7 +158,16 @@ class SearchState extends State<SearchPage> {
 
   Widget _buildVertBody(BuildContext context, Widget headerList) {
     return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('Test').snapshots(),
+      stream: Firestore.instance
+          .collection('Lipsticks')
+          .where(
+            'rating',
+            isGreaterThan: '4.0',
+          )
+          .orderBy('rating', descending: true)
+          .orderBy('name')
+          .limit(30)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return LinearProgressIndicator();
 
@@ -308,18 +300,44 @@ class SearchState extends State<SearchPage> {
     );
   }
 
-  List<ChildItem> buildSearchList() {
-    List<String> searchList = List();
-    for (int i = 0; i < list.length; i++) {
-      String item = list.elementAt(i);
-      if (item.toLowerCase().contains(searchQuery.text.toLowerCase())) {
-        searchList.add(item);
+  Widget buildSearchList(BuildContext context) {
+    return new StreamBuilder<QuerySnapshot>(
+        stream: Firestore.instance.collection("Lipsticks").snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) return new Container();
+          return new ListView(children: getSearchItems(snapshot));
+        });
+  }
+
+  getSearchItems(AsyncSnapshot<QuerySnapshot> snapshot) {
+    List<DocumentSnapshot> docs = snapshot.data.documents;
+    List<String> names = List();
+    List<ChildItem> searchList = List();
+    for (var d in docs)  {
+      names.add(Product.fromSnapshot(d).name);
+      if (!names.contains(Product.fromSnapshot(d).brand)) {
+        names.add(Product.fromSnapshot(d).brand);
       }
     }
-    return searchList.map((name) => new ChildItem(this, name)).toList();
+    for (int i = 0; i < names.length; i++) {
+      String item = names.elementAt(i);
+      if (item.toLowerCase().contains(searchQuery.text.toLowerCase())) {
+        searchList.add(ChildItem(this, item));
+      }
+    }
+    return searchList;
   }
 
   Widget buildBar(BuildContext context) {
+    /*var citiesRef = Firestore.instance.collection('Test');
+    var query = citiesRef.where('brand', isEqualTo: 'Dose Of Colors')
+        .getDocuments()
+        .then((snapshot) {
+      for (var doc in snapshot.documents) {
+        print(doc.toString() + ' => ' + Product.fromSnapshot(doc).toString());
+      }
+    });*/
+
     return new AppBar(
         centerTitle: true,
         title: appBarTitle,
