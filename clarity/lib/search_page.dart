@@ -21,7 +21,7 @@ class SearchState extends State<SearchPage> {
   );
   final key = new GlobalKey<ScaffoldState>();
 
-  bool isSearching;
+  bool isSearching = false;
 
   SearchState() {
     searchQuery.addListener(() {
@@ -38,12 +38,6 @@ class SearchState extends State<SearchPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    isSearching = false;
-  }
-
-  @override
   Widget build(BuildContext context) {
     return new MediaQuery(
         data: new MediaQueryData(),
@@ -54,9 +48,7 @@ class SearchState extends State<SearchPage> {
             key: key,
             appBar: buildBar(context),
             body: new Container(
-              child: isSearching
-                  ? buildSearchList(context)
-                  : buildHomePage(),
+              child: isSearching ? buildSearchList(context) : buildHomePage(),
             ),
           ),
         ));
@@ -67,8 +59,7 @@ class SearchState extends State<SearchPage> {
       body: _buildHoriBody(context),
     );
   }
-
-  Widget _buildHoriBody(BuildContext context) {
+Widget _buildHoriBody(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance
           .collection('Lipsticks')
@@ -101,9 +92,9 @@ class SearchState extends State<SearchPage> {
     return Padding(
       padding: padding,
       child: new InkWell(
-        onTap: () {
+        /*onTap: () {
           print('Card selected');
-        },
+        },*/
         child: new Container(
           decoration: new BoxDecoration(
             borderRadius: new BorderRadius.circular(10.0),
@@ -191,6 +182,9 @@ class SearchState extends State<SearchPage> {
       BuildContext context, DocumentSnapshot data, Widget headerList) {
     final record = Product.fromSnapshot(data);
     return new ListTile(
+      onTap: () {
+        _handleSearchSend(record.name);
+      },
       title: new Column(
         children: <Widget>[
           new Row(
@@ -222,20 +216,15 @@ class SearchState extends State<SearchPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  new Text(
-                    record.brand,
-                    style: new TextStyle(
-                        fontSize: 15.0,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  new Text(
-                    record.name,
-                    style: new TextStyle(
-                        fontSize: 13.0,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.normal),
-                  )
+                  new Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: new Text(
+                        record.name,
+                        style: new TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.bold),
+                      )),
                 ],
               )),
             ],
@@ -266,7 +255,7 @@ class SearchState extends State<SearchPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   new Text(
-                    'Explore',
+                    'Featured',
                     textAlign: TextAlign.center,
                     style: new TextStyle(
                         color: Colors.white,
@@ -274,7 +263,7 @@ class SearchState extends State<SearchPage> {
                         fontSize: 22.0),
                   ),
                   new Container(
-                      height: 280.0, width: _width, child: headerList),
+                      height: 260.0, width: _width, child: headerList),
                   buildVertical(context, headerList)
                 ],
               ),
@@ -313,7 +302,7 @@ class SearchState extends State<SearchPage> {
     List<DocumentSnapshot> docs = snapshot.data.documents;
     List<String> names = List();
     List<ChildItem> searchList = List();
-    for (var d in docs)  {
+    for (var d in docs) {
       names.add(Product.fromSnapshot(d).name);
       if (!names.contains(Product.fromSnapshot(d).brand)) {
         names.add(Product.fromSnapshot(d).brand);
@@ -329,15 +318,6 @@ class SearchState extends State<SearchPage> {
   }
 
   Widget buildBar(BuildContext context) {
-    /*var citiesRef = Firestore.instance.collection('Test');
-    var query = citiesRef.where('brand', isEqualTo: 'Dose Of Colors')
-        .getDocuments()
-        .then((snapshot) {
-      for (var doc in snapshot.documents) {
-        print(doc.toString() + ' => ' + Product.fromSnapshot(doc).toString());
-      }
-    });*/
-
     return new AppBar(
         centerTitle: true,
         title: appBarTitle,
@@ -395,7 +375,6 @@ class SearchState extends State<SearchPage> {
   }
 
   void _handleSearchSend(String query) {
-    print(query);
     _handleSearchEnd();
     Navigator.push(
       context,
@@ -462,4 +441,23 @@ class Product {
 
   @override
   String toString() => "Product<$brand:$name:$price:$rating:$image:$link>";
+}
+
+class Brand {
+  final String name;
+  final String image;
+
+  final DocumentReference reference;
+
+  Brand.fromMap(Map<String, dynamic> map, {this.reference})
+       : assert(map['name'] != null),
+        assert(map['image'] != null),
+        name = map['name'],
+        image = map['image'];
+
+  Brand.fromSnapshot(DocumentSnapshot snapshot)
+      : this.fromMap(snapshot.data, reference: snapshot.reference);
+
+  @override
+  String toString() => "Product<$name:$image>";
 }
