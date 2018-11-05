@@ -13,15 +13,17 @@ class ResultsPage extends StatefulWidget {
 }
 
 class _ResultsPageState extends State<ResultsPage> {
-  var imageCount = 2;
+  var imageCount = 1;
 
   Widget _buildHeaderList(BuildContext context, DocumentSnapshot document){
     return new ListView.builder(
       itemBuilder: (context, index) {
-        EdgeInsets padding = index == 0
+        EdgeInsets padding = 
+        index == 0
             ? const EdgeInsets.only(
                 left: 20.0, right: 10.0, top: 4.0, bottom: 30.0)
-            : const EdgeInsets.only(
+            :
+             const EdgeInsets.only(
                 left: 10.0, right: 10.0, top: 4.0, bottom: 30.0);
 
         return new Padding(
@@ -43,12 +45,10 @@ class _ResultsPageState extends State<ResultsPage> {
                 image: new DecorationImage(
                   image: new NetworkImage(
                       document['image']),
-                  // image: new ExactAssetImage(
-                  //     'assets/img_${index % items.length}.jpg'),
+               
                   fit: BoxFit.fitHeight,
                 ),
               ),
-              //                                    height: 200.0,
               width: 200.0,
               child: new Stack(
                 children: <Widget>[
@@ -56,7 +56,7 @@ class _ResultsPageState extends State<ResultsPage> {
                     alignment: Alignment.bottomCenter,
                     child: new Container(
                         decoration: new BoxDecoration(
-                            color: const Color(0xFF273A48),
+                            color: Colors.redAccent,
                             borderRadius: new BorderRadius.only(
                                 bottomLeft: new Radius.circular(10.0),
                                 bottomRight: new Radius.circular(10.0))),
@@ -84,12 +84,7 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   Widget _buildBottomList(BuildContext context, DocumentSnapshot document){
-    // List<String> itemListInfo = [
-    //   "Price " + document['price'],
-    //   'Rating: ' + document['rating'],
-
-    // ];
-
+    //this is for firestore only
     List<List<String>> itemListInfo = [
       ["Price " , document['price']],
       ['Rating: ', document['rating']],
@@ -121,41 +116,11 @@ class _ResultsPageState extends State<ResultsPage> {
                                   ),
                                   new Text(
                                     itemListInfo[index][1],
-                                    // 'Item Subheader goes here\nLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry',
                                     style: new TextStyle(
                                         fontSize: 12.0,
                                         color: Colors.black54,
                                         fontWeight: FontWeight.normal),
                                   )
-
-                                  // new Text(
-                                  //   'Price: ' + document['price'],
-                                  //   style: new TextStyle(
-                                  //       fontSize: 16.0,
-                                  //       color: Colors.black87,
-                                  //       fontWeight: FontWeight.bold),
-                                  // ),
-                                  // new Text(
-                                  //   'Rating: ' + document['rating'],
-                                  //   style: new TextStyle(
-                                  //       fontSize: 16.0,
-                                  //       color: Colors.black87,
-                                  //       fontWeight: FontWeight.bold),
-                                  // ),
-                                  // new Text(
-                                  //   'Reviews',
-                                  //   style: new TextStyle(
-                                  //       fontSize: 14.0,
-                                  //       color: Colors.black87,
-                                  //       fontWeight: FontWeight.bold),
-                                  // ),
-                                  // new Text(
-                                  //   'Item Subheader goes here\nLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry',
-                                  //   style: new TextStyle(
-                                  //       fontSize: 12.0,
-                                  //       color: Colors.black54,
-                                  //       fontWeight: FontWeight.normal),
-                                  // )
                                 ],
                               )),
                             ],
@@ -207,14 +172,6 @@ class _ResultsPageState extends State<ResultsPage> {
         title: new Text(widget.title),
         elevation: 0.0,
         backgroundColor: Colors.transparent,
-        /*actions: <Widget>[
-          new IconButton(
-              icon: new Icon(
-                Icons.search,
-                color: Colors.white,
-              ),
-              onPressed: () {})
-        ],*/
       ),
       backgroundColor: Colors.transparent,
       body: new Container(
