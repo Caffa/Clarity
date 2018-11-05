@@ -14,11 +14,6 @@ class ResultsPage extends StatefulWidget {
 
 class _ResultsPageState extends State<ResultsPage> {
   var imageCount = 2;
-  // List<String> items = [
-  //   "Item 1",
-  //   "Item 2",
-  //   "Item 3"
-  // ];
 
   Widget _buildHeaderList(BuildContext context, DocumentSnapshot document){
     return new ListView.builder(
@@ -257,5 +252,6 @@ class _ResultsPageState extends State<ResultsPage> {
         ],
       ),
     );
+
   }
 }
