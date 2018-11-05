@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
       title: 'Clarity',
       debugShowCheckedModeBanner: false,
       theme: new ThemeData(
-        primarySwatch: Colors.pink,
+        primarySwatch: Colors.red,
       ),
       home: new SearchPage(),
     );
