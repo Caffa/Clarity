@@ -17,7 +17,166 @@ class ResultsPage extends StatefulWidget {
 }
 
 class _ResultsPageState extends State<ResultsPage> {
-  var imageCount = 1;
+    Map _googleResults;
+    var imageCount = 1;
+
+    @override
+    void initState() {
+      super.initState();
+        // This is the proper place to make the async calls
+        // This way they only get called once
+
+        // During development, if you change this code,
+        // you will need to do a full restart instead of just a hot reload
+        
+        // You can't use async/await here,
+        // We can't mark this method as async because of the @override
+        loadAsyncData().then((result) {
+            // If we need to rebuild the widget with the resulting data,
+            // make sure to use `setState`
+            setState(() {
+                _googleResults = result;
+            });
+        });
+    }
+
+  Future<Map> fetchFromCSE(customSearchUrl) async {
+    final response = await http.get(customSearchUrl);
+    print(response.body);
+    // var responseJson = json.decode(response.body.toString());
+
+    // //fixes some odd errors
+    // var myString = json.encode(responseJson);
+    // var formattedJson = json.decode(myString);
+
+    var formattedJson = json.decode(response.body.toString());
+    //get number of results
+    int resultCount = 0;
+   
+    if(formattedJson.containsKey("queries")){
+      resultCount = int.parse(formattedJson["queries"]["request"][0]["totalResults"]);
+    }
+    // print(resultCount);
+
+    String dummyImageUrl = "http://unbxd.com/blog/wp-content/uploads/2014/02/No-results-found.jpg";
+    
+    List<List<String>> dummyListData = [
+      ["No Results found" , 'We could not find any listings from amazon and soko glam']
+      ];
+      //default assumption cannot find
+      String imageLink = dummyImageUrl;
+      List<List<String>> bottomListInfo = dummyListData;
+
+    if(resultCount != 0){
+      //process this json
+      imageLink = formattedJson["items"][0]["pagemap"]["cse_image"][0]["src"];
+
+      var result = formattedJson["items"];
+  
+      bottomListInfo = new List();
+      List<String> productImagesList = new List();
+      productImagesList.add("ImageList");
+      
+  result.forEach((element) {
+    try{
+    var title = (element["title"]);
+    var pgMap = (element["pagemap"]);
+    var pgMeta = pgMap["metatags"][0];
+//     image check
+    if(pgMap.containsKey("cse_image")){
+      productImagesList.add(pgMap["cse_image"][0]["src"]);
+    }
+// gets ratings (might need to put product name)
+    if(pgMap.containsKey("aggregaterating")){
+       bottomListInfo.add(["Rating Count", pgMap["aggregaterating"][0]["ratingcount"]]);
+       bottomListInfo.add(["Rating Value", pgMap["aggregaterating"][0]["ratingvalue"]]);
+    }
+// gets prices
+    if(pgMap.containsKey("offer")){
+       bottomListInfo.add(["Offer " + title, pgMap["offer"][0]["price"] + " " + pgMap["offer"][0]["pricecurrency"] ]);
+    }
+// gets descriptions
+    if(pgMeta.containsKey("og")){
+      bottomListInfo.add(["Description", pgMeta["og"]["description"] ]);
+    }
+    //TODO find a way to get reviews?
+    									
+    }catch(e){
+      print(e);
+      // print(element["pagemap"]);
+    }
+   
+  });
+  
+  bottomListInfo.add(productImagesList);
+  
+  print(bottomListInfo);
+ 
+    }
+
+
+      var toRet = {
+        // Key:    Value
+        'headerImg': imageLink,
+        'bottomList': bottomListInfo,
+      };
+
+    return toRet;
+
+  }
+
+  Future<Map> loadAsyncData(){
+    var customSearchUrl = "https://www.googleapis.com/customsearch/v1/siterestrict?key=AIzaSyBqPiaQJjHxVBW7ZYfCKxwqdUl1sFIf3aI&cx=007128306264330162968:4phmp_x0f8g&q=" + widget.query; 
+    var googleResults = fetchFromCSE(customSearchUrl);
+    return googleResults;  
+  }
+  
+  Widget _buildImageList(List<String> imageLinkList){
+    var myHeader =  new ListView.builder(
+      itemBuilder: (context, index) {
+        EdgeInsets padding = 
+        index == 0
+            ? const EdgeInsets.only(
+                left: 20.0, right: 10.0, top: 4.0, bottom: 30.0)
+            :
+             const EdgeInsets.only(
+                left: 10.0, right: 10.0, top: 4.0, bottom: 30.0);
+
+        return new Padding(
+          padding: padding,
+          child: new InkWell(
+            onTap: () {
+              print('Card selected');
+            },
+            child: new Container(
+              decoration: new BoxDecoration(
+                borderRadius: new BorderRadius.circular(10.0),
+                color: Colors.lightBlue,
+                boxShadow: [
+                  new BoxShadow(
+                      color: Colors.black.withAlpha(70),
+                      offset: const Offset(3.0, 10.0),
+                      blurRadius: 15.0)
+                ],
+                image: new DecorationImage(
+                  image: new NetworkImage(
+                      imageLinkList[index]),
+               
+                  fit: BoxFit.fitHeight,
+                ),
+              ),
+              width: 100.0,
+            ),
+          ),
+        );
+      },
+      scrollDirection: Axis.horizontal,
+      itemCount: imageLinkList.length,
+    );
+    final _width = MediaQuery.of(context).size.width;
+
+    return new Container(height: 100.0, width: _width, child: myHeader);
+  }
 
   Widget _buildHeaderList(BuildContext context, DocumentSnapshot document){
     return new ListView.builder(
@@ -140,6 +299,54 @@ class _ResultsPageState extends State<ResultsPage> {
 
   }
 
+  List<Widget> _complexListItemBuilder(List<String> item){
+    List<Widget> toRet = new List<Widget>();
+    if(item.length == 1){
+      Widget singleObject = new Text(
+        item[0],
+        style: new TextStyle(
+            fontSize: 16.0,
+            color: Colors.black87,
+            fontWeight: FontWeight.bold),
+      );
+      toRet.add(singleObject);                           
+    }else if(item.length == 2){
+      Widget titleObj = new Text(item[0],
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold),
+            );
+      Widget subTextObj = new Text(
+              item[1],
+              style: new TextStyle(
+                  fontSize: 12.0,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.normal),
+            );
+      toRet.add(titleObj);
+      toRet.add(subTextObj);
+    }else{
+      //assume the first item dictates how to show it
+      //what type of tile? TODO
+      if(item[0] == "ImageList"){
+        Widget titleObj = new Text("Images",
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold),
+            );
+        toRet.add(titleObj);
+        List<String> imageLinks = item.sublist(1);
+        toRet.add(_buildImageList(imageLinks));
+      }
+
+    }
+
+    return toRet;
+
+  }
+
   Widget _buildComplexBottomList(List<List<String>> itemListInfo){
 
     return new Expanded(
@@ -157,22 +364,7 @@ class _ResultsPageState extends State<ResultsPage> {
                                   child: new Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  new Text(
-                                    itemListInfo[index][0],
-                                    style: new TextStyle(
-                                        fontSize: 16.0,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  new Text(
-                                    itemListInfo[index][1],
-                                    style: new TextStyle(
-                                        fontSize: 12.0,
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.normal),
-                                  )
-                                ],
+                                children: _complexListItemBuilder(itemListInfo[index])
                               )),
                             ],
                           ),
@@ -187,54 +379,11 @@ class _ResultsPageState extends State<ResultsPage> {
 
   }
 
-// Future<List> fetchFromCSE(customSearchUrl) async {
-//   final response = await http.get(customSearchUrl);
-//   print(response.body);
-//   List responseJson = json.decode(response.body.toString());
-//   return responseJson;
-//   }
-
-  List<List<List<String>>> googleCustomSearch() {
-    //using widget.query
-    // var customSearchUrl = "https://www.googleapis.com/customsearch/v1/siterestrict?key=AIzaSyBqPiaQJjHxVBW7ZYfCKxwqdUl1sFIf3aI&cx=007128306264330162968:4phmp_x0f8g&q=" + widget.query; 
-    // List customSearchResults = await fetchFromCSE(customSearchUrl);
-    //future builder?
-    //todo : check that you got results
-
-    //unpack into standard format
-
-
-    String imageUrl = "http://cdn.shopify.com/s/files/1/0249/1218/products/Missha-Time-Revolution-The-First-Treatment-Essence-Intensive-Moist_grande_57a9ddeb-9f2c-4772-8955-1aa17cfaa135_grande.jpg?v=1506963497";
-    
-    List<List<String>> listData = [
-      ["Price " , '\$5'],
-      ['Rating: ', '5.89'],
-      ['General Info', 'lots of dataots of dataots of dataots of dataots of dataots of dataots of dataots of data']
-    ];
-
-    //dummy
-    return [
-      [[imageUrl]],
-      listData
-    ];
-
-  }
-
   List<Widget> _getContentGoogle(){
 
-    List<List<List<String>>> infoList = googleCustomSearch();
-
-    String imageUrl = infoList[0][0][0];
-
-    List<List<String>> bottomInfoList = infoList[1];
-
-    // dynamic bottomInfoList = infoList.removeAt(0);
-
-    // List<List<String>> bottomInfoList = [
-    //   ["Price " , '\$5'],
-    //   ['Rating: ', '5.89'],
-    //   ['General Info', 'lots of dataots of dataots of dataots of dataots of dataots of dataots of dataots of data']
-    // ];
+    Map infoList = _googleResults;
+    String headerImgUrl = infoList["headerImg"];
+    List<List<String>> bottomInfoList = infoList["bottomList"];
 
     Widget headerImg = new Container(
       constraints: BoxConstraints.expand(
@@ -245,7 +394,7 @@ class _ResultsPageState extends State<ResultsPage> {
       child: Text('Loading', style: Theme.of(context).textTheme.display1.copyWith(color: Colors.white)),
       foregroundDecoration: BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage(imageUrl),
+          image: NetworkImage(headerImgUrl),
         ),
       ),
     );
@@ -255,6 +404,9 @@ class _ResultsPageState extends State<ResultsPage> {
     List<Widget> bodyList = [headerImg, bottomInfo];
     return bodyList;                
   }
+  
+  
+  
   @override
   Widget build(BuildContext context) {
     final _width = MediaQuery.of(context).size.width;
@@ -310,7 +462,6 @@ class _ResultsPageState extends State<ResultsPage> {
     );
 //Google query components
 
-
     final googleBody = new Scaffold(
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
@@ -344,6 +495,22 @@ class _ResultsPageState extends State<ResultsPage> {
 
     );
 
+    // final googleBody = new FutureBuilder(
+    //   future: null,
+    //   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+    //     switch (snapshot.connectionState) {
+    //       case ConnectionState.none: return new Text('Press button to start');
+    //       case ConnectionState.waiting: return new Text('Awaiting result...');
+    //       case ConnectionState.done:
+    //         return googleBodyIntermediate;
+    //       default:
+    //         if (snapshot.hasError)
+    //           return new Text('Error: ${snapshot.error}');
+    //         else
+    //           return new Text('Result: ${snapshot.data}');
+    //     }
+    //   },
+    // );
 
 
     var body;
@@ -353,7 +520,11 @@ class _ResultsPageState extends State<ResultsPage> {
     if(useFB){
       body = fbBody;
     }else{
-      body = googleBody;
+      if(_googleResults == null){
+        body = new Text("Loading");
+      }else{
+        body = googleBody;
+      }
     }
 
     return new Container(
