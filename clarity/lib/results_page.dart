@@ -86,6 +86,12 @@ class _ResultsPageState extends State<ResultsPage> {
     if(pgMap.containsKey("cse_image")){
       productImagesList.add(pgMap["cse_image"][0]["src"]);
     }
+
+    if(pgMeta.containsKey("og:title") && pgMeta.containsKey("og:description")){
+      title = pgMeta["og:title"];
+      bottomListInfo.add([pgMeta["og:title"], pgMeta["og:description"] ]);
+      // print("///// Found Descriptions /////   " + pgMeta["og"]["description"] );
+    }
 // gets ratings (might need to put product name)
     if(pgMap.containsKey("aggregaterating")){
        bottomListInfo.add(["Rating Count", pgMap["aggregaterating"][0]["ratingcount"]]);
@@ -96,13 +102,11 @@ class _ResultsPageState extends State<ResultsPage> {
        bottomListInfo.add(["Offer " + title, pgMap["offer"][0]["price"] + " " + pgMap["offer"][0]["pricecurrency"] ]);
     }
 // gets descriptions
-    if(pgMeta.containsKey("og")){
-      bottomListInfo.add(["Description", pgMeta["og"]["description"] ]);
-    }
+    
     //TODO find a way to get reviews?
     									
     }catch(e){
-      print(e);
+      // print(e);
       // print(element["pagemap"]);
     }
    
@@ -110,7 +114,7 @@ class _ResultsPageState extends State<ResultsPage> {
   
   bottomListInfo.add(productImagesList);
   
-  print(bottomListInfo);
+  // print(bottomListInfo);
  
     }
 
@@ -382,8 +386,11 @@ class _ResultsPageState extends State<ResultsPage> {
   List<Widget> _getContentGoogle(){
 
     Map infoList = _googleResults;
+
     String headerImgUrl = infoList["headerImg"];
     List<List<String>> bottomInfoList = infoList["bottomList"];
+
+    print(bottomInfoList);
 
     Widget headerImg = new Container(
       constraints: BoxConstraints.expand(
