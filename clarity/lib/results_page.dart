@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 
-
 class ResultsPage extends StatefulWidget {
   final String query;
   final String title;
@@ -17,28 +16,28 @@ class ResultsPage extends StatefulWidget {
 }
 
 class _ResultsPageState extends State<ResultsPage> {
-    Map _googleResults;
-    var imageCount = 1;
+  Map _googleResults;
+  var imageCount = 1;
 
-    @override
-    void initState() {
-      super.initState();
-        // This is the proper place to make the async calls
-        // This way they only get called once
+  @override
+  void initState() {
+    super.initState();
+    // This is the proper place to make the async calls
+    // This way they only get called once
 
-        // During development, if you change this code,
-        // you will need to do a full restart instead of just a hot reload
-        
-        // You can't use async/await here,
-        // We can't mark this method as async because of the @override
-        loadAsyncData().then((result) {
-            // If we need to rebuild the widget with the resulting data,
-            // make sure to use `setState`
-            setState(() {
-                _googleResults = result;
-            });
-        });
-    }
+    // During development, if you change this code,
+    // you will need to do a full restart instead of just a hot reload
+
+    // You can't use async/await here,
+    // We can't mark this method as async because of the @override
+    loadAsyncData().then((result) {
+      // If we need to rebuild the widget with the resulting data,
+      // make sure to use `setState`
+      setState(() {
+        _googleResults = result;
+      });
+    });
+  }
 
   Future<Map> fetchFromCSE(customSearchUrl) async {
     final response = await http.get(customSearchUrl);
@@ -52,98 +51,108 @@ class _ResultsPageState extends State<ResultsPage> {
     var formattedJson = json.decode(response.body.toString());
     //get number of results
     int resultCount = 0;
-   
-    if(formattedJson.containsKey("queries")){
-      resultCount = int.parse(formattedJson["queries"]["request"][0]["totalResults"]);
+
+    if (formattedJson.containsKey("queries")) {
+      resultCount =
+          int.parse(formattedJson["queries"]["request"][0]["totalResults"]);
     }
     // print(resultCount);
 
-    String dummyImageUrl = "http://unbxd.com/blog/wp-content/uploads/2014/02/No-results-found.jpg";
-    
-    List<List<String>> dummyListData = [
-      ["No Results found" , 'We could not find any listings from amazon and soko glam']
-      ];
-      //default assumption cannot find
-      String imageLink = dummyImageUrl;
-      List<List<String>> bottomListInfo = dummyListData;
+    String dummyImageUrl =
+        "http://unbxd.com/blog/wp-content/uploads/2014/02/No-results-found.jpg";
 
-    if(resultCount != 0){
+    List<List<String>> dummyListData = [
+      [
+        "No Results found",
+        'We could not find any listings from amazon and soko glam'
+      ]
+    ];
+    //default assumption cannot find
+    String imageLink = dummyImageUrl;
+    List<List<String>> bottomListInfo = dummyListData;
+
+    if (resultCount != 0) {
       //process this json
       imageLink = formattedJson["items"][0]["pagemap"]["cse_image"][0]["src"];
 
       var result = formattedJson["items"];
-  
+
       bottomListInfo = new List();
       List<String> productImagesList = new List();
       productImagesList.add("ImageList");
-      
-  result.forEach((element) {
-    try{
-    var title = (element["title"]);
-    var pgMap = (element["pagemap"]);
-    var pgMeta = pgMap["metatags"][0];
+
+      result.forEach((element) {
+        try {
+          var title = (element["title"]);
+          var pgMap = (element["pagemap"]);
+          var pgMeta = pgMap["metatags"][0];
 //     image check
-    if(pgMap.containsKey("cse_image")){
-      productImagesList.add(pgMap["cse_image"][0]["src"]);
-    }
+          if (pgMap.containsKey("cse_image")) {
+            productImagesList.add(pgMap["cse_image"][0]["src"]);
+          }
 
-    if(pgMeta.containsKey("og:title") && pgMeta.containsKey("og:description")){
-      title = pgMeta["og:title"];
-      bottomListInfo.add([pgMeta["og:title"], pgMeta["og:description"] ]);
-      // print("///// Found Descriptions /////   " + pgMeta["og"]["description"] );
-    }
+          if (pgMeta.containsKey("og:title") &&
+              pgMeta.containsKey("og:description")) {
+            title = pgMeta["og:title"];
+            bottomListInfo.add([pgMeta["og:title"], pgMeta["og:description"]]);
+            // print("///// Found Descriptions /////   " + pgMeta["og"]["description"] );
+          }
 // gets ratings (might need to put product name)
-    if(pgMap.containsKey("aggregaterating")){
-       bottomListInfo.add(["Rating Count", pgMap["aggregaterating"][0]["ratingcount"]]);
-       bottomListInfo.add(["Rating Value", pgMap["aggregaterating"][0]["ratingvalue"]]);
-    }
+          if (pgMap.containsKey("aggregaterating")) {
+            bottomListInfo.add(
+                ["Rating Count", pgMap["aggregaterating"][0]["ratingcount"]]);
+            bottomListInfo.add(
+                ["Rating Value", pgMap["aggregaterating"][0]["ratingvalue"]]);
+          }
 // gets prices
-    if(pgMap.containsKey("offer")){
-       bottomListInfo.add(["Offer " + title, pgMap["offer"][0]["price"] + " " + pgMap["offer"][0]["pricecurrency"] ]);
-    }
+          if (pgMap.containsKey("offer")) {
+            bottomListInfo.add([
+              "Offer " + title,
+              pgMap["offer"][0]["price"] +
+                  " " +
+                  pgMap["offer"][0]["pricecurrency"]
+            ]);
+          }
 // gets descriptions
-    
-    //TODO find a way to get reviews?
-    									
-    }catch(e){
-      // print(e);
-      // print(element["pagemap"]);
-    }
-   
-  });
-  
-  bottomListInfo.add(productImagesList);
-  
-  // print(bottomListInfo);
- 
+
+          //TODO find a way to get reviews?
+
+        } catch (e) {
+          // print(e);
+          // print(element["pagemap"]);
+        }
+      });
+
+      bottomListInfo.add(productImagesList);
+
+      // print(bottomListInfo);
+
     }
 
-
-      var toRet = {
-        // Key:    Value
-        'headerImg': imageLink,
-        'bottomList': bottomListInfo,
-      };
+    var toRet = {
+      // Key:    Value
+      'headerImg': imageLink,
+      'bottomList': bottomListInfo,
+    };
 
     return toRet;
-
   }
 
-  Future<Map> loadAsyncData(){
-    var customSearchUrl = "https://www.googleapis.com/customsearch/v1/siterestrict?key=AIzaSyBqPiaQJjHxVBW7ZYfCKxwqdUl1sFIf3aI&cx=007128306264330162968:4phmp_x0f8g&q=" + widget.query; 
+  Future<Map> loadAsyncData() {
+    var customSearchUrl =
+        "https://www.googleapis.com/customsearch/v1/siterestrict?key=AIzaSyBqPiaQJjHxVBW7ZYfCKxwqdUl1sFIf3aI&cx=007128306264330162968:4phmp_x0f8g&q=" +
+            widget.query;
     var googleResults = fetchFromCSE(customSearchUrl);
-    return googleResults;  
+    return googleResults;
   }
-  
-  Widget _buildImageList(List<String> imageLinkList){
-    var myHeader =  new ListView.builder(
+
+  Widget _buildImageList(List<String> imageLinkList) {
+    var myHeader = new ListView.builder(
       itemBuilder: (context, index) {
-        EdgeInsets padding = 
-        index == 0
+        EdgeInsets padding = index == 0
             ? const EdgeInsets.only(
                 left: 20.0, right: 10.0, top: 4.0, bottom: 30.0)
-            :
-             const EdgeInsets.only(
+            : const EdgeInsets.only(
                 left: 10.0, right: 10.0, top: 4.0, bottom: 30.0);
 
         return new Padding(
@@ -155,7 +164,7 @@ class _ResultsPageState extends State<ResultsPage> {
             child: new Container(
               decoration: new BoxDecoration(
                 borderRadius: new BorderRadius.circular(10.0),
-                color: Colors.lightBlue,
+                color: Colors.white,
                 boxShadow: [
                   new BoxShadow(
                       color: Colors.black.withAlpha(70),
@@ -163,10 +172,8 @@ class _ResultsPageState extends State<ResultsPage> {
                       blurRadius: 15.0)
                 ],
                 image: new DecorationImage(
-                  image: new NetworkImage(
-                      imageLinkList[index]),
-               
-                  fit: BoxFit.fitHeight,
+                  image: new NetworkImage(imageLinkList[index]),
+                  fit: BoxFit.scaleDown,
                 ),
               ),
               width: 100.0,
@@ -182,15 +189,13 @@ class _ResultsPageState extends State<ResultsPage> {
     return new Container(height: 100.0, width: _width, child: myHeader);
   }
 
-  Widget _buildHeaderList(BuildContext context, DocumentSnapshot document){
+  Widget _buildHeaderList(BuildContext context, DocumentSnapshot document) {
     return new ListView.builder(
       itemBuilder: (context, index) {
-        EdgeInsets padding = 
-        index == 0
+        EdgeInsets padding = index == 0
             ? const EdgeInsets.only(
                 left: 20.0, right: 10.0, top: 4.0, bottom: 30.0)
-            :
-             const EdgeInsets.only(
+            : const EdgeInsets.only(
                 left: 10.0, right: 10.0, top: 4.0, bottom: 30.0);
 
         return new Padding(
@@ -202,7 +207,7 @@ class _ResultsPageState extends State<ResultsPage> {
             child: new Container(
               decoration: new BoxDecoration(
                 borderRadius: new BorderRadius.circular(10.0),
-                color: Colors.lightBlue,
+                color: Colors.white,
                 boxShadow: [
                   new BoxShadow(
                       color: Colors.black.withAlpha(70),
@@ -210,9 +215,7 @@ class _ResultsPageState extends State<ResultsPage> {
                       blurRadius: 15.0)
                 ],
                 image: new DecorationImage(
-                  image: new NetworkImage(
-                      document['image']),
-               
+                  image: new NetworkImage(document['image']),
                   fit: BoxFit.fitHeight,
                 ),
               ),
@@ -247,144 +250,130 @@ class _ResultsPageState extends State<ResultsPage> {
       scrollDirection: Axis.horizontal,
       itemCount: imageCount,
     );
-    
   }
 
-  Widget _buildBottomList(BuildContext context, DocumentSnapshot document){
+  Widget _buildBottomList(BuildContext context, DocumentSnapshot document) {
     //this is for firestore only
     List<List<String>> itemListInfo = [
-      ["Price " , document['price']],
+      ["Price ", document['price']],
       ['Rating: ', document['rating']],
-      ['Reviews', "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry"]
+      [
+        'Reviews',
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry"
+      ]
     ];
 
     return new Expanded(
-                    child: ListView.builder(
-                      itemCount: itemListInfo.length,
-                      itemBuilder: (context, index) 
-                       {
-                    return new ListTile(
-                      title: new Column(
-                        children: <Widget>[
-                          new Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              new Expanded(
-                                  child: new Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  new Text(
-                                    itemListInfo[index][0],
-                                    style: new TextStyle(
-                                        fontSize: 16.0,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  new Text(
-                                    itemListInfo[index][1],
-                                    style: new TextStyle(
-                                        fontSize: 12.0,
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.normal),
-                                  )
-                                ],
-                              )),
-                            ],
-                          ),
-                          new Divider(),
-                        ],
-                      ),
-                    );
-                  }
-                  )
-                  );
-                
-
+        child: ListView.builder(
+            itemCount: itemListInfo.length,
+            itemBuilder: (context, index) {
+              return new ListTile(
+                title: new Column(
+                  children: <Widget>[
+                    new Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        new Expanded(
+                            child: new Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            new Text(
+                              itemListInfo[index][0],
+                              style: new TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            new Text(
+                              itemListInfo[index][1],
+                              style: new TextStyle(
+                                  fontSize: 12.0,
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.normal),
+                            )
+                          ],
+                        )),
+                      ],
+                    ),
+                    new Divider(),
+                  ],
+                ),
+              );
+            }));
   }
 
-  List<Widget> _complexListItemBuilder(List<String> item){
+  List<Widget> _complexListItemBuilder(List<String> item) {
     List<Widget> toRet = new List<Widget>();
-    if(item.length == 1){
+    if (item.length == 1) {
       Widget singleObject = new Text(
         item[0],
         style: new TextStyle(
-            fontSize: 16.0,
-            color: Colors.black87,
-            fontWeight: FontWeight.bold),
+            fontSize: 16.0, color: Colors.black87, fontWeight: FontWeight.bold),
       );
-      toRet.add(singleObject);                           
-    }else if(item.length == 2){
-      Widget titleObj = new Text(item[0],
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.bold),
-            );
+      toRet.add(singleObject);
+    } else if (item.length == 2) {
+      Widget titleObj = new Text(
+        item[0],
+        style: new TextStyle(
+            fontSize: 16.0, color: Colors.black87, fontWeight: FontWeight.bold),
+      );
       Widget subTextObj = new Text(
-              item[1],
-              style: new TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.normal),
-            );
+        item[1],
+        style: new TextStyle(
+            fontSize: 12.0,
+            color: Colors.black54,
+            fontWeight: FontWeight.normal),
+      );
       toRet.add(titleObj);
       toRet.add(subTextObj);
-    }else{
+    } else {
       //assume the first item dictates how to show it
       //what type of tile? TODO
-      if(item[0] == "ImageList"){
-        Widget titleObj = new Text("Images",
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.bold),
-            );
+      if (item[0] == "ImageList") {
+        Widget titleObj = new Text(
+          "Images",
+          style: new TextStyle(
+              fontSize: 16.0,
+              color: Colors.black87,
+              fontWeight: FontWeight.bold),
+        );
         toRet.add(titleObj);
         List<String> imageLinks = item.sublist(1);
         toRet.add(_buildImageList(imageLinks));
       }
-
     }
 
     return toRet;
-
   }
 
-  Widget _buildComplexBottomList(List<List<String>> itemListInfo){
-
+  Widget _buildComplexBottomList(List<List<String>> itemListInfo) {
     return new Expanded(
-                    child: ListView.builder(
-                      itemCount: itemListInfo.length,
-                      itemBuilder: (context, index) 
-                       {
-                    return new ListTile(
-                      title: new Column(
-                        children: <Widget>[
-                          new Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              new Expanded(
-                                  child: new Column(
+        child: ListView.builder(
+            itemCount: itemListInfo.length,
+            itemBuilder: (context, index) {
+              return new ListTile(
+                title: new Column(
+                  children: <Widget>[
+                    new Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        new Expanded(
+                            child: new Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: _complexListItemBuilder(itemListInfo[index])
-                              )),
-                            ],
-                          ),
-                          new Divider(),
-                        ],
-                      ),
-                    );
-                  }
-                  )
-                  );
-                
-
+                                children: _complexListItemBuilder(
+                                    itemListInfo[index]))),
+                      ],
+                    ),
+                    new Divider(),
+                  ],
+                ),
+              );
+            }));
   }
 
-  List<Widget> _getContentGoogle(){
-
+  List<Widget> _getContentGoogle() {
     Map infoList = _googleResults;
 
     String headerImgUrl = infoList["headerImg"];
@@ -398,7 +387,11 @@ class _ResultsPageState extends State<ResultsPage> {
       ),
       padding: const EdgeInsets.all(8.0),
       alignment: Alignment.center,
-      child: Text('Loading', style: Theme.of(context).textTheme.display1.copyWith(color: Colors.white)),
+      child: Text('Loading',
+          style: Theme.of(context)
+              .textTheme
+              .display1
+              .copyWith(color: Colors.white)),
       foregroundDecoration: BoxDecoration(
         image: DecorationImage(
           image: NetworkImage(headerImgUrl),
@@ -409,31 +402,33 @@ class _ResultsPageState extends State<ResultsPage> {
     Widget bottomInfo = _buildComplexBottomList(bottomInfoList);
 
     List<Widget> bodyList = [headerImg, bottomInfo];
-    return bodyList;                
+    return bodyList;
   }
-  
-  
-  
+
   @override
   Widget build(BuildContext context) {
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 //Fire base components
     final fbHeader = new StreamBuilder(
-      stream: Firestore.instance.collection("Lipsticks") .where("name", isEqualTo: widget.query).snapshots(),
-      // stream: Firestore.instance.collection('Lipsticks').where('title', isEqualTo: widget.query).snapshots(),
-      builder: (context, snapshot){
-        if (!snapshot.hasData) return const Text('Loading...');
-        return _buildHeaderList(context, snapshot.data.documents[0]);
-      }
-    );
+        stream: Firestore.instance
+            .collection("Lipsticks")
+            .where("name", isEqualTo: widget.query)
+            .snapshots(),
+        // stream: Firestore.instance.collection('Lipsticks').where('title', isEqualTo: widget.query).snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const Text('Loading...');
+          return _buildHeaderList(context, snapshot.data.documents[0]);
+        });
     final fbBottomList = new StreamBuilder(
-      stream: Firestore.instance.collection("Lipsticks") .where("name", isEqualTo: widget.query).snapshots(),
-      builder: (context, snapshot){
-        if (!snapshot.hasData) return const Text('Loading...');
-        return _buildBottomList(context, snapshot.data.documents[0]);
-      }
-    );
+        stream: Firestore.instance
+            .collection("Lipsticks")
+            .where("name", isEqualTo: widget.query)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const Text('Loading...');
+          return _buildBottomList(context, snapshot.data.documents[0]);
+        });
     final fbBody = new Scaffold(
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
@@ -457,10 +452,9 @@ class _ResultsPageState extends State<ResultsPage> {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  new Container(
-                      height: 300.0, width: _width, child: fbHeader),
+                  new Container(height: 300.0, width: _width, child: fbHeader),
                   fbBottomList,
-                 ],
+                ],
               ),
             ),
           ],
@@ -488,18 +482,14 @@ class _ResultsPageState extends State<ResultsPage> {
             new Padding(
               padding: new EdgeInsets.only(top: 10.0),
               child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: 
-                  _getContentGoogle()
-                 
-              ),
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: _getContentGoogle()),
             ),
           ],
         ),
       ),
-
     );
 
     // final googleBody = new FutureBuilder(
@@ -519,24 +509,23 @@ class _ResultsPageState extends State<ResultsPage> {
     //   },
     // );
 
-
     var body;
 
     bool useFB = false;
 
-    if(useFB){
+    if (useFB) {
       body = fbBody;
-    }else{
-      if(_googleResults == null){
+    } else {
+      if (_googleResults == null) {
         body = new Text("Loading");
-      }else{
+      } else {
         body = googleBody;
       }
     }
 
     return new Container(
       decoration: new BoxDecoration(
-        color: const Color(0xFF273A48),
+        color: Colors.redAccent,
       ),
       child: new Stack(
         children: <Widget>[
@@ -548,6 +537,5 @@ class _ResultsPageState extends State<ResultsPage> {
         ],
       ),
     );
-
   }
 }
