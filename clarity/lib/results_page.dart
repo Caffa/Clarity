@@ -4,6 +4,10 @@ import 'background.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
+// import 'package:flutter/services.dart';
+// import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 class ResultsPage extends StatefulWidget {
   final String query;
@@ -39,14 +43,12 @@ class _ResultsPageState extends State<ResultsPage> {
     });
   }
 
+    //https://www.reddit.com/r/redditdev/comments/3fv8vv/new_api_endpoint_now_you_can_search_comments/
+
+
   Future<Map> fetchFromCSE(customSearchUrl) async {
     final response = await http.get(customSearchUrl);
     print(response.body);
-    // var responseJson = json.decode(response.body.toString());
-
-    // //fixes some odd errors
-    // var myString = json.encode(responseJson);
-    // var formattedJson = json.decode(myString);
 
     var formattedJson = json.decode(response.body.toString());
     //get number of results
@@ -68,8 +70,8 @@ class _ResultsPageState extends State<ResultsPage> {
       ]
     ];
     //default assumption cannot find
-    String imageLink = dummyImageUrl;
-    List<List<String>> bottomListInfo = dummyListData;
+    String imageLink;
+    List<List<String>> bottomListInfo;
 
     if (resultCount != 0) {
       //process this json
@@ -129,6 +131,49 @@ class _ResultsPageState extends State<ResultsPage> {
 
     }
 
+//Do get reddit stuff here
+
+    try{
+    final redditResponse = await http.get("https://api.pushshift.io/reddit/search?q=" + widget.query + "&limit=100");
+    print(redditResponse.body);
+    var redditJson = json.decode(redditResponse.body);
+
+    var data = redditJson["data"];
+
+    data.forEach((element){
+      // print("MY element" + element);
+      var author = element["author"];
+      var body = element["body"];
+      var permalink = element["permalink"];
+      var subreddit = element["subreddit"];
+      // var created = element["created_utc"];
+
+      //can add some better check here for contents of body later TODO
+
+      // bool bodyContentsCheck = body.contains(widget.query);
+      bool bodyContentsCheck = body != "" && !body.Contains("SELL/SWAP") && !body.Contains(" SELL ");
+
+      if (bodyContentsCheck) {
+          bottomListInfo.add([
+            "Reddit", author, body, subreddit, permalink
+          ]);
+        }
+    });
+    }catch(e){
+      print("Reddit failed");
+      print(e.toString());
+    }
+
+
+
+
+
+// end reddit stuff
+    if(bottomListInfo.length == 0){
+          imageLink = dummyImageUrl;
+          bottomListInfo = dummyListData;
+    }
+
     var toRet = {
       // Key:    Value
       'headerImg': imageLink,
@@ -143,8 +188,68 @@ class _ResultsPageState extends State<ResultsPage> {
         "https://www.googleapis.com/customsearch/v1/siterestrict?key=AIzaSyBqPiaQJjHxVBW7ZYfCKxwqdUl1sFIf3aI&cx=007128306264330162968:4phmp_x0f8g&q=" +
             widget.query;
     var googleResults = fetchFromCSE(customSearchUrl);
+
+    // var redditInfo = fetchFromReddit();
+
+    // var finalMap = {}..addAll(redditInfo)..addAll(googleResults);
+
+
     return googleResults;
   }
+
+  Widget _buildRedditBlock(List<String> redditInfoList){
+    //author, body, subreddit, permalink 
+    Widget myWidget = new Container(
+      padding: const EdgeInsets.all(32.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              //put author and subreddit on same top row
+              Container(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    redditInfoList[0], //author
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                // new Expanded(child: null,),
+                //put the subred here
+                new Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: new Text(
+              redditInfoList[2],
+              style: new TextStyle(fontSize: 12.0, color: Colors.grey),
+            ))
+            ],
+          ),
+         Text(
+              redditInfoList[1], //text
+              style: TextStyle(
+                color: Colors.grey,
+              ))
+        ],
+      )
+
+    );
+
+    Widget clickable = new InkWell(
+              child: myWidget,
+              onTap: () => _launchURL("www.reddit.com" + redditInfoList[3]));        
+    return clickable;
+  }
+
+  _launchURL(url) async {
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
+  }
+}
+
 
   Widget _buildImageList(List<String> imageLinkList) {
     var myHeader = new ListView.builder(
@@ -341,6 +446,12 @@ class _ResultsPageState extends State<ResultsPage> {
         toRet.add(titleObj);
         List<String> imageLinks = item.sublist(1);
         toRet.add(_buildImageList(imageLinks));
+      }
+
+      if(item[0] == "Reddit"){
+ 
+        toRet.add(_buildRedditBlock(item.sublist(1)));
+
       }
     }
 
