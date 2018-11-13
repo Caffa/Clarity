@@ -453,9 +453,108 @@ class _ResultsPageState extends State<ResultsPage> {
         toRet.add(_buildRedditBlock(item.sublist(1)));
 
       }
+
+      if(item[0] == "ListItems"){
+        Widget titleObj = new Text(
+          item[1],
+          style: new TextStyle(
+              fontSize: 16.0,
+              color: Colors.black87,
+              fontWeight: FontWeight.bold),
+        );
+        toRet.add(titleObj);
+        
+        var widgetList = makeTitleSubList(item.sublist(2));
+
+        toRet.addAll(widgetList);
+
+
+      }
     }
 
     return toRet;
+  }
+
+  Widget _makeTitle(String titleName){
+    return new Text(
+          titleName,
+          style: new TextStyle(
+              fontSize: 16.0,
+              color: Colors.black87,
+              fontWeight: FontWeight.bold),
+        );
+    
+  }
+
+  Widget _makeSubTitle(String subtext){
+    return new Text(
+        subtext,
+        style: new TextStyle(
+            fontSize: 12.0,
+            color: Colors.black54,
+            fontWeight: FontWeight.normal),
+      );
+
+  }
+
+  List<Widget> makeTitleSubList(List<String> titleSubList){
+    List<Widget> myList = new List();
+    var totalLength = titleSubList.length;
+    for(int i = 0; i < totalLength+1; i = i+2){
+      Widget title = _makeTitle(titleSubList[i]);
+      Widget subtitle = _makeSubTitle(titleSubList[i+1]);
+      myList.add(title);
+      myList.add(subtitle);
+    }
+
+    return myList;
+
+  }
+
+  List<Widget> _getDummyContent(){
+    // String headerImgUrl = ;
+
+    // List<List<String>> dummyBottomList = ;
+    //     Map infoList = {
+    //       "headerImg": headerImgUrl,
+    //       "bottomList": dummyBottomList
+    //     };
+
+        // //put dummy data here!! TODO
+
+
+    String headerImgUrl = "https://www.sulwhasoo.com/kr/ko/pim/dam/product/170605_large_image/580/580_ConcentratedGinsengRenewingEyeCream_1.png";
+    List<List<String>> bottomInfoList = [
+      ["ImageList", "https://cdn.shopify.com/s/files/1/0894/5488/products/sul_eye_03.jpg?v=1467706643", "https://images.neimanmarcus.com/ca/4/product_assets/C/1/D/A/E/NMC1DAE_mz.jpg", "https://1.bp.blogspot.com/-cKS3JWHLhQg/WT_539B_tfI/AAAAAAAA-wA/qUhUsdNgbCoXSpr41JuRrHc7EuStIdHrwCEw/s1600/sulwhasoo%2Bginseng%2Beye%2Bcream%2B0.jpg", "http://k.lnwfile.com/_/k/_raw/jh/xw/7t.jpg", "https://i.ebayimg.com/images/g/WNgAAOSw5cNYIEWb/s-l300.jpg"],
+      ["Price: 180.00 USD"],
+      ["Description", "An anti-aging eye cream formulated with red ginseng that helps minimize the look of wrinkles and improves the visible appearance of firmness for youthful-looking eyes."],
+      ["ListItems", "Mentioned in Reddit Posts", "title of post", "comment", "title of post", "comment", "title of post", "comment" ]
+    ];
+
+    print(bottomInfoList);
+
+    Widget headerImg = new Container(
+      constraints: BoxConstraints.expand(
+        height: Theme.of(context).textTheme.display1.fontSize * 1.1 + 200.0,
+      ),
+      padding: const EdgeInsets.all(8.0),
+      alignment: Alignment.center,
+      child: Text('Loading',
+          style: Theme.of(context)
+              .textTheme
+              .display1
+              .copyWith(color: Colors.white)),
+      foregroundDecoration: BoxDecoration(
+        image: DecorationImage(
+          image: NetworkImage(headerImgUrl),
+        ),
+      ),
+    );
+
+    Widget bottomInfo = _buildComplexBottomList(bottomInfoList);
+
+    List<Widget> bodyList = [headerImg, bottomInfo];
+    return bodyList;
   }
 
   Widget _buildComplexBottomList(List<List<String>> itemListInfo) {
@@ -484,97 +583,13 @@ class _ResultsPageState extends State<ResultsPage> {
             }));
   }
 
-  List<Widget> _getContentGoogle() {
-    Map infoList = _googleResults;
-
-    String headerImgUrl = infoList["headerImg"];
-    List<List<String>> bottomInfoList = infoList["bottomList"];
-
-    print(bottomInfoList);
-
-    Widget headerImg = new Container(
-      constraints: BoxConstraints.expand(
-        height: Theme.of(context).textTheme.display1.fontSize * 1.1 + 200.0,
-      ),
-      padding: const EdgeInsets.all(8.0),
-      alignment: Alignment.center,
-      child: Text('Loading',
-          style: Theme.of(context)
-              .textTheme
-              .display1
-              .copyWith(color: Colors.white)),
-      foregroundDecoration: BoxDecoration(
-        image: DecorationImage(
-          image: NetworkImage(headerImgUrl),
-        ),
-      ),
-    );
-
-    Widget bottomInfo = _buildComplexBottomList(bottomInfoList);
-
-    List<Widget> bodyList = [headerImg, bottomInfo];
-    return bodyList;
-  }
 
   @override
   Widget build(BuildContext context) {
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
-//Fire base components
-    final fbHeader = new StreamBuilder(
-        stream: Firestore.instance
-            .collection("Lipsticks")
-            .where("name", isEqualTo: widget.query)
-            .snapshots(),
-        // stream: Firestore.instance.collection('Lipsticks').where('title', isEqualTo: widget.query).snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Text('Loading...');
-          return _buildHeaderList(context, snapshot.data.documents[0]);
-        });
-    final fbBottomList = new StreamBuilder(
-        stream: Firestore.instance
-            .collection("Lipsticks")
-            .where("name", isEqualTo: widget.query)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Text('Loading...');
-          return _buildBottomList(context, snapshot.data.documents[0]);
-        });
-    final fbBody = new Scaffold(
-      floatingActionButton: new FloatingActionButton(
-        onPressed: () {
-          Navigator.pop(context); //goes back
-        },
-        child: new Icon(Icons.keyboard_return),
-      ),
-      appBar: new AppBar(
-        title: new Text(widget.title),
-        elevation: 0.0,
-        backgroundColor: Colors.transparent,
-      ),
-      backgroundColor: Colors.transparent,
-      body: new Container(
-        child: new Stack(
-          children: <Widget>[
-            new Padding(
-              padding: new EdgeInsets.only(top: 10.0),
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  new Container(height: 300.0, width: _width, child: fbHeader),
-                  fbBottomList,
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-//Google query components
 
-    final googleBody = new Scaffold(
+    final dummyBody = new Scaffold(
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
           Navigator.pop(context); //goes back
@@ -596,43 +611,17 @@ class _ResultsPageState extends State<ResultsPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.start,
-                  children: _getContentGoogle()),
+                  children: _getDummyContent()),
             ),
           ],
         ),
       ),
     );
 
-    // final googleBody = new FutureBuilder(
-    //   future: null,
-    //   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-    //     switch (snapshot.connectionState) {
-    //       case ConnectionState.none: return new Text('Press button to start');
-    //       case ConnectionState.waiting: return new Text('Awaiting result...');
-    //       case ConnectionState.done:
-    //         return googleBodyIntermediate;
-    //       default:
-    //         if (snapshot.hasError)
-    //           return new Text('Error: ${snapshot.error}');
-    //         else
-    //           return new Text('Result: ${snapshot.data}');
-    //     }
-    //   },
-    // );
 
-    var body;
 
-    bool useFB = false;
+    var body = dummyBody;
 
-    if (useFB) {
-      body = fbBody;
-    } else {
-      if (_googleResults == null) {
-        body = new Text("Loading");
-      } else {
-        body = googleBody;
-      }
-    }
 
     return new Container(
       decoration: new BoxDecoration(
