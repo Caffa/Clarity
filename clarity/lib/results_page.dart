@@ -418,31 +418,15 @@ class _ResultsPageState extends State<ResultsPage> {
       );
       toRet.add(singleObject);
     } else if (item.length == 2) {
-      Widget titleObj = new Text(
-        item[0],
-        style: new TextStyle(
-            fontSize: 16.0, color: Colors.black87, fontWeight: FontWeight.bold),
-      );
-      Widget subTextObj = new Text(
-        item[1],
-        style: new TextStyle(
-            fontSize: 12.0,
-            color: Colors.black54,
-            fontWeight: FontWeight.normal),
-      );
+      Widget titleObj = _makeTitle(item[0]);
+      Widget subTextObj = _makeSubTitle(item[1]);
       toRet.add(titleObj);
       toRet.add(subTextObj);
     } else {
       //assume the first item dictates how to show it
       //what type of tile? TODO
       if (item[0] == "ImageList") {
-        Widget titleObj = new Text(
-          "Images",
-          style: new TextStyle(
-              fontSize: 16.0,
-              color: Colors.black87,
-              fontWeight: FontWeight.bold),
-        );
+        Widget titleObj = _makeTitle("Images");
         toRet.add(titleObj);
         List<String> imageLinks = item.sublist(1);
         toRet.add(_buildImageList(imageLinks));
@@ -453,10 +437,67 @@ class _ResultsPageState extends State<ResultsPage> {
         toRet.add(_buildRedditBlock(item.sublist(1)));
 
       }
+
+      if(item[0] == "ListItems"){
+        Widget titleObj = _makeTitle(item[1]);
+        toRet.add(titleObj);
+        
+        var widgetList = makeTitleSubList(item.sublist(2));
+
+        toRet.addAll(widgetList);
+
+
+      }
     }
 
     return toRet;
   }
+
+
+
+  Widget _makeTitle(String titleName){
+    return new Text(
+          titleName,
+          style: new TextStyle(
+              fontSize: 16.0,
+              color: Colors.black87,
+              fontWeight: FontWeight.bold),
+        );
+    
+  }
+
+  Widget _makeSubTitle(String subtext){
+    return new Text(
+        subtext,
+        style: new TextStyle(
+            fontSize: 12.0,
+            color: Colors.black54,
+            fontWeight: FontWeight.normal),
+      );
+
+  }
+
+  List<Widget> makeTitleSubList(List<String> titleSubList){
+    List<Widget> myList = new List();
+    var totalLength = titleSubList.length;
+    for(int i = 0; i < totalLength+1; i = i+2){
+      Widget title = _makeTitle(titleSubList[i]);
+      Widget subtitle = _makeSubTitle(titleSubList[i+1]);
+      myList.add(title);
+      myList.add(subtitle);
+    }
+
+    return myList;
+
+  }
+
+
+
+
+
+
+
+      
 
   Widget _buildComplexBottomList(List<List<String>> itemListInfo) {
     return new Expanded(
