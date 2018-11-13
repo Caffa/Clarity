@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AD_UNIT_ID_FOR_BANNER_TEST</key>
+	<string>ca-app-pub-3940256099942544/2934735716</string>
+	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
+	<string>ca-app-pub-3940256099942544/4411468910</string>
+	<key>CLIENT_ID</key>
+	<string>429262709746-balmhm0nmfl87e3erfjv1goo93krvrvf.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.429262709746-balmhm0nmfl87e3erfjv1goo93krvrvf</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAZ7H0-DCcwVkguOe42Ufdpo3pcEg28H0g</string>
+	<key>GCM_SENDER_ID</key>
+	<string>429262709746</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.clarity</string>
+	<key>PROJECT_ID</key>
+	<string>claritydb-ba97d</string>
+	<key>STORAGE_BUCKET</key>
+	<string>claritydb-ba97d.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<true></true>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<false></false>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:429262709746:ios:86abf9c6b81ed678</string>
+	<key>DATABASE_URL</key>
+	<string>https://claritydb-ba97d.firebaseio.com</string>
+</dict>
+</plist>
