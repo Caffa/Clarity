@@ -14,14 +14,10 @@ class SearchPage extends StatefulWidget {
 }
 
 class SearchState extends State<SearchPage> {
-  Widget appBarTitle;
-  Icon actionIcon = new Icon(
-    Icons.search,
-    color: Colors.white,
-  );
   final key = new GlobalKey<ScaffoldState>();
 
   bool isSearching = false;
+  bool searchOver = true;
 
   SearchState() {
     searchQuery.addListener(() {
@@ -46,7 +42,7 @@ class SearchState extends State<SearchPage> {
           home: new Scaffold(
             resizeToAvoidBottomPadding: false,
             key: key,
-            appBar: buildBar(context),
+            appBar: searchOver ? buildBar() : buildSearchBar(context),
             body: new Container(
               child: isSearching ? buildSearchList(context) : buildHomePage(),
             ),
@@ -59,7 +55,8 @@ class SearchState extends State<SearchPage> {
       body: _buildHoriBody(context),
     );
   }
-Widget _buildHoriBody(BuildContext context) {
+
+  Widget _buildHoriBody(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance
           .collection('Lipsticks')
@@ -317,55 +314,53 @@ Widget _buildHoriBody(BuildContext context) {
     return searchList;
   }
 
-  Widget buildBar(BuildContext context) {
+  Widget buildBar() {
+    return new AppBar(
+      backgroundColor: Colors.redAccent,
+      actions: <Widget>[
+        new IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              setState(() {
+                searchOver = false;
+              });
+            }),
+        new IconButton(icon: Icon(Icons.feedback), onPressed: _handleFeedback),
+      ],
+    );
+  }
+
+  Widget buildSearchBar(BuildContext context) {
     return new AppBar(
         centerTitle: true,
-        title: appBarTitle,
+        title:
+            new Stack(alignment: const Alignment(1.0, 1.0), children: <Widget>[
+          new TextField(
+            controller: searchQuery,
+            style: new TextStyle(
+              color: Colors.white,
+            ),
+            decoration: new InputDecoration(
+                hintText: "Type to search",
+                hintStyle: new TextStyle(color: Colors.white)),
+          ),
+          new IconButton(
+              icon: Icon(Icons.clear),
+              onPressed: () {
+                _handleSearchEnd();
+              })
+        ]),
         backgroundColor: Colors.redAccent,
         actions: <Widget>[
           new IconButton(
-            icon: actionIcon,
-            onPressed: () {
-              setState(() {
-                if (this.actionIcon.icon == Icons.search) {
-                  this.appBarTitle = new Stack(
-                      alignment: const Alignment(1.0, 1.0),
-                      children: <Widget>[
-                        new TextField(
-                          controller: searchQuery,
-                          style: new TextStyle(
-                            color: Colors.white,
-                          ),
-                          decoration: new InputDecoration(
-                              hintText: "Search...",
-                              hintStyle: new TextStyle(color: Colors.white)),
-                        ),
-                        new IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            _handleSearchEnd();
-                          },
-                        )
-                      ]);
-                  _handleSearchStart();
-                } else {
-                  _handleSearchSend(searchQuery.text);
-                }
-              });
-            },
-          ),
-          new IconButton(
-              icon: Icon(Icons.feedback), onPressed: _handleFeedback),
+              icon: new Icon(
+                Icons.send,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                _handleSearchSend(searchQuery.text);
+              })
         ]);
-  }
-
-  void _handleSearchStart() {
-    setState(() {
-      this.actionIcon = new Icon(
-        Icons.send,
-        color: Colors.white,
-      );
-    });
   }
 
   void _handleSearchEnd() {
@@ -375,6 +370,9 @@ Widget _buildHoriBody(BuildContext context) {
   }
 
   void _handleSearchSend(String query) {
+    setState(() {
+      searchOver = true;
+    });
     _handleSearchEnd();
     Navigator.push(
       context,
@@ -450,7 +448,7 @@ class Brand {
   final DocumentReference reference;
 
   Brand.fromMap(Map<String, dynamic> map, {this.reference})
-       : assert(map['name'] != null),
+      : assert(map['name'] != null),
         assert(map['image'] != null),
         name = map['name'],
         image = map['image'];
