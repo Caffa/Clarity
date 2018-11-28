@@ -1,23 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../results.dart';
-import 'home.dart';
-import 'package:intl/intl.dart';
+import 'results.dart';
+import 'product.dart';
 
-class Comments extends StatelessWidget {
+class BrandsPage extends StatefulWidget {
+  final String query;
+
+  BrandsPage({Key key, this.query}) : super(key: key);
+
+  @override
+  _BrandsPageState createState() => new _BrandsPageState();
+}
+
+class _BrandsPageState extends State<BrandsPage> {
+  final String siteUrl = 'https://www.sephora.com';
+
   @override
   Widget build(BuildContext context) {
-    return _buildVertBody(context);
+    return new Scaffold(
+      appBar: new AppBar(
+        elevation: 0.0,
+        backgroundColor: Colors.indigo,
+      ),
+      backgroundColor: Colors.white,
+      body: _buildVertBody(context),
+    );
   }
 
   Widget _buildVertBody(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance
-          .collection('Comments')
-          .where('id', isEqualTo: id.text)
+          .collection('Products')
+          .where('brand', isEqualTo: widget.query)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return buildEmpty();
+        if (!snapshot.hasData) return LinearProgressIndicator();
         return _buildVertList(context, snapshot.data.documents);
       },
     );
@@ -33,6 +50,7 @@ class Comments extends StatelessWidget {
   }
 
   Widget _buildVertListItem(BuildContext context, DocumentSnapshot data) {
+    final record = Product.fromSnapshot(data);
     return new ListTile(
       onTap: () {
         Navigator.push(
@@ -45,6 +63,25 @@ class Comments extends StatelessWidget {
           new Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              new Container(
+                height: 72.0,
+                width: 72.0,
+                decoration: new BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      new BoxShadow(
+                          color: Colors.black.withAlpha(70),
+                          offset: const Offset(2.0, 2.0),
+                          blurRadius: 2.0)
+                    ],
+                    borderRadius:
+                        new BorderRadius.all(new Radius.circular(12.0)),
+                    image: new DecorationImage(
+                      image:
+                          NetworkImage(siteUrl + record.images[0].toString()),
+                      fit: BoxFit.scaleDown,
+                    )),
+              ),
               new SizedBox(
                 width: 8.0,
               ),
@@ -59,21 +96,14 @@ class Comments extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           new Text(
-                            data['item'],
+                            record.name,
                             style: new TextStyle(
                                 fontSize: 15.0,
                                 color: Colors.black87,
                                 fontWeight: FontWeight.bold),
                           ),
                           new Text(
-                            data['comment'],
-                            style: new TextStyle(
-                                fontSize: 15.0, color: Colors.black87),
-                          ),
-                          new Text(
-                            DateFormat('dd MMM kk:mm').format(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                    int.parse(data['timestamp']))),
+                            'USD ' + record.price,
                             style: new TextStyle(
                                 fontSize: 15.0, color: Colors.black87),
                           )
@@ -86,18 +116,6 @@ class Comments extends StatelessWidget {
           new Divider(),
         ],
       ),
-    );
-  }
-
-  Widget buildEmpty() {
-    return new Container(
-      child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            new Icon(Icons.comment, size: 150.0, color: Colors.black12),
-            new Text('No comments')
-          ]),
     );
   }
 }

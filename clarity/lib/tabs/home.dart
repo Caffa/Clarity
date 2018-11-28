@@ -1,9 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../results.dart';
+import '../brands.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:uuid/uuid.dart';
+import '../product.dart';
+
+TextEditingController id = new TextEditingController();
 
 class Home extends StatelessWidget {
   final String siteUrl = 'https://www.sephora.com';
+  final TextStorage storage = TextStorage();
+
+  Home() {
+    createId();
+  }
+
+  void createId() {
+    storage.readFile().then((String text) {
+      if (text == '' || text == null) {
+        var uuid = new Uuid();
+        String uid = uuid.v1();
+        storage.writeFile(uid);
+        id.text = uid;
+        Firestore.instance
+            .collection('Users')
+            .add({"user": uid, "timestamp": Timestamp.now()});
+      } else {
+        id.text = text;
+      }
+    });
+  }
 
   Widget buildHorizontal(BuildContext context) {
     return Scaffold(
@@ -44,9 +73,12 @@ class Home extends StatelessWidget {
     return Padding(
       padding: padding,
       child: new InkWell(
-        /*onTap: () {
-          print('Card selected');
-        },*/
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => BrandsPage(query: data['brand'])));
+        },
         child: new Container(
           decoration: new BoxDecoration(
             borderRadius: new BorderRadius.circular(10.0),
@@ -177,7 +209,7 @@ class Home extends StatelessWidget {
                           new Text(
                             record.name,
                             style: new TextStyle(
-                                  fontSize: 15.0,
+                                fontSize: 15.0,
                                 color: Colors.black87,
                                 fontWeight: FontWeight.bold),
                           ),
@@ -242,33 +274,35 @@ class Home extends StatelessWidget {
   }
 }
 
-class Product {
-  final String brand;
-  final String name;
-  final String price;
-  final String loves;
-  final List<dynamic> images;
-  final List<dynamic> details;
+class TextStorage {
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
 
-  final DocumentReference reference;
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/id.txt');
+  }
 
-  Product.fromMap(Map<String, dynamic> map, {this.reference})
-      : assert(map['brand'] != null),
-        assert(map['name'] != null),
-        //assert(map['price'] != null),
-        assert(map['loves'] != null),
-        //assert(map['image'] != null),
-        assert(map['details'] != null),
-        brand = map['brand'],
-        name = map['name'],
-        price = map['price'],
-        loves = map['loves'],
-        images = map['images'],
-        details = map['details'];
+  Future<String> readFile() async {
+    try {
+      final file = await _localFile;
 
-  Product.fromSnapshot(DocumentSnapshot snapshot)
-      : this.fromMap(snapshot.data, reference: snapshot.reference);
+      String content = await file.readAsString();
+      return content;
+    } catch (e) {
+      return '';
+    }
+  }
 
-  @override
-  String toString() => "Product<$brand:$name:$price:$loves$images:$details>";
+  Future<File> writeFile(String text) async {
+    final file = await _localFile;
+    return file.writeAsString(text);
+  }
+
+  Future<File> cleanFile() async {
+    final file = await _localFile;
+    return file.writeAsString('');
+  }
 }

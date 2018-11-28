@@ -9,6 +9,8 @@ import './screens/about.dart' as _aboutPage;
 import './screens/support.dart' as _supportPage;
 import './screens/feedback.dart' as _feedbackPage;
 import 'results.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'product.dart';
 
 final TextEditingController searchQuery = new TextEditingController();
 
@@ -184,7 +186,13 @@ class TabsState extends State<Tabs> {
 
   void _handleSearchSend(String query) {
     if (query == null || query == '') {
-      print('search cannot be empty');
+      Fluttertoast.showToast(
+          msg: "Search cannot be empty",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          bgcolor: "#3f51b5",
+          textcolor: '#ffffff');
       return;
     }
     setState(() {
@@ -203,7 +211,7 @@ class TabsState extends State<Tabs> {
       onPageChanged: onTabChanged,
       children: <Widget>[
         new _firstTab.Home(),
-        new _secondTab.Dashboard(),
+        new _secondTab.Comments(),
         new _thirdTab.Favourites()
       ],
     );
@@ -317,6 +325,12 @@ class TabsState extends State<Tabs> {
                 Navigator.pop(context);
                 Navigator.of(context).pushNamed('/feedback');
               }),
+          new Divider(),
+          new ListTile(
+              leading: new Icon(Icons.priority_high),
+              title: new Text('Disclaimer'),
+              subtitle: new Text(
+                  'All content and images in this app are used without permission from Sephora (www.sephora.com) and will be taken down immediately upon request.'))
         ],
       )));
 
@@ -354,7 +368,7 @@ class TabItem {
 
 const List<TabItem> TabItems = const <TabItem>[
   const TabItem(title: 'Home', icon: Icons.home),
-  const TabItem(title: 'Dashboard', icon: Icons.dashboard),
+  const TabItem(title: 'Comments', icon: Icons.comment),
   const TabItem(title: 'Favourites', icon: Icons.favorite)
 ];
 
@@ -376,35 +390,4 @@ class ChildItem extends StatelessWidget {
           state._handleSearchSend(this.name);
         });
   }
-}
-
-class Product {
-  final String brand;
-  final String name;
-  final String price;
-  final String loves;
-  final List<dynamic> images;
-  final List<dynamic> details;
-
-  final DocumentReference reference;
-
-  Product.fromMap(Map<String, dynamic> map, {this.reference})
-      : assert(map['brand'] != null),
-        assert(map['name'] != null),
-        //assert(map['price'] != null),
-        assert(map['loves'] != null),
-        //assert(map['image'] != null),
-        assert(map['details'] != null),
-        brand = map['brand'],
-        name = map['name'],
-        price = map['price'],
-        loves = map['loves'],
-        images = map['images'],
-        details = map['details'];
-
-  Product.fromSnapshot(DocumentSnapshot snapshot)
-      : this.fromMap(snapshot.data, reference: snapshot.reference);
-
-  @override
-  String toString() => "Product<$brand:$name:$price:$loves$images:$details>";
 }

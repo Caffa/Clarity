@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
-
-final TextEditingController profile = new TextEditingController();
+import '../results.dart';
 
 class Profile extends StatefulWidget {
   final TextStorage storage = TextStorage();
@@ -74,7 +73,7 @@ class _ProfileState extends State<Profile> {
             new ListTile(
               leading: const Icon(Icons.face),
               title: new TextField(
-                maxLength: 10,
+                maxLength: 15,
                 maxLines: null,
                 controller: _textField,
                 decoration: new InputDecoration(hintText: 'Edit username'),
@@ -95,7 +94,7 @@ class TextStorage {
 
   Future<File> get _localFile async {
     final path = await _localPath;
-    return File('$path/text.txt');
+    return File('$path/profile.txt');
   }
 
   Future<String> readFile() async {

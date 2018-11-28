@@ -37,7 +37,7 @@ class _FavouritesState extends State<Favourites> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             new Icon(Icons.favorite, size: 150.0, color: Colors.black12),
-            new Text('No favourites added')
+            new Text('No favourites')
           ]),
     );
   }
@@ -84,8 +84,7 @@ class _FavouritesState extends State<Favourites> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) =>
-                ResultsPage(query: note.title))).then((_) {
+            builder: (context) => ResultsPage(query: note.title))).then((_) {
       setState(() {
         db.getAllNotes().then((notes) {
           setState(() {

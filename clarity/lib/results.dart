@@ -6,9 +6,13 @@ import 'tabs/favourites_files/image_page_item.dart';
 import 'tabs/favourites_files/image_page_transformer.dart';
 import 'tabs/favourites_files/image_item.dart';
 import 'screens/profile.dart';
+import 'comments.dart';
+
+final TextEditingController profile = new TextEditingController();
 
 class ResultsPage extends StatefulWidget {
   final String query;
+  final TextStorage storage = TextStorage();
 
   ResultsPage({Key key, this.query}) : super(key: key);
 
@@ -21,12 +25,14 @@ class _ResultsPageState extends State<ResultsPage> {
   Note note;
   DatabaseHelper db = new DatabaseHelper();
 
-  String profileName = profile.text;
-  TextEditingController comment = new TextEditingController();
-
   @override
   void initState() {
     super.initState();
+    widget.storage.readFile().then((String text) {
+      setState(() {
+        profile.text = text;
+      });
+    });
 
     db.checkNote(widget.query).then((result) {
       isFave = result;
@@ -72,15 +78,38 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   Widget _buildTitle(BuildContext context, DocumentSnapshot document) {
-    return ListTile(
-        title: Text(widget.query,
-            style: TextStyle(fontSize: 18.0, color: Colors.indigo)),
-        trailing: new IconButton(
-            icon:
-                Icon(Icons.favorite, color: isFave ? Colors.red : Colors.grey),
-            onPressed: () {
-              _favourite(getImage(document['images']));
-            }));
+    return new Padding(
+        padding: EdgeInsets.only(left: 15.0, right: 15.0),
+        child: new Container(
+            width: MediaQuery.of(context).size.width,
+            child: ListBody(children: <Widget>[
+              new Text(widget.query,
+                  style: TextStyle(fontSize: 18.0, color: Colors.indigo)),
+              new Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  new IconButton(
+                      icon: Icon(Icons.favorite,
+                          color: isFave ? Colors.red : Colors.grey),
+                      onPressed: () {
+                        _favourite(getImage(document['images']));
+                      }),
+                  new IconButton(
+                      icon: Icon(
+                        Icons.comment,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  CommentsPage(query: widget.query)),
+                        );
+                      })
+                ],
+              ),
+            ])));
   }
 
   Widget _buildHeaderList(BuildContext context, DocumentSnapshot document) {
@@ -123,7 +152,7 @@ class _ResultsPageState extends State<ResultsPage> {
     );
   }
 
-  Widget usageTile(String title, String desc) {
+  Widget usageTile(String desc) {
     List<String> usages = desc.split('-');
 
     List<ListTile> texts = List();
@@ -145,7 +174,7 @@ class _ResultsPageState extends State<ResultsPage> {
     );
   }
 
-  Widget ingredientsTile(String title, String desc) {
+  Widget ingredientsTile(String desc) {
     List<Widget> chips = List();
     List<String> usages = desc.split(', ');
 
@@ -171,64 +200,35 @@ class _ResultsPageState extends State<ResultsPage> {
     );
   }
 
-  Widget _buildComment(BuildContext context, List<DocumentSnapshot> documents) {
-    return new ListTile(
-          title: Text(documents[1]['user']),
-          subtitle: Text(documents[1]['comment'])
-      );
-  }
-
-  Widget buildComments() {
-    return new ExpansionTile(
-        title: Text('Comments', style: TextStyle(fontSize: 16.0)),
-        children: <Widget>[
-          new StreamBuilder(
-              stream: Firestore.instance
-                  .collection("Comments")
-                  .where("item", isEqualTo: widget.query)
-                  .limit(5)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Text('No comments');
-                return _buildComment(context, snapshot.data.documents);
-              }),
-          IconButton(
-              icon: Icon(Icons.list),
-              onPressed: () {
-                writeComment(widget.query);
-              }),
-          IconButton(
-              icon: Icon(Icons.rate_review),
-              onPressed: () {
-                writeComment(widget.query);
-              })
-        ]
-        );
-  }
-
-  Widget _customListTile(int index, String title, String desc) {
-    if (title == 'Comments') {
-      return buildComments();
-    } else if (index == 3) {
-      return detailsTile(title, desc);
-    } else if (index == 4) {
-      if (desc.toLowerCase().contains('suggested usage')) {
-        return usageTile(title, desc);
-      }
-      return ingredientsTile(title, desc);
-    } else if (index == 5) {
-      return ingredientsTile(title, desc);
-    }
+  Widget _customListTile(String title, String subtitle) {
     return new ListTile(
       title: new Text(
         title,
         style: TextStyle(fontSize: 14.0),
       ),
       subtitle: new Text(
-        desc,
+        subtitle,
         style: TextStyle(fontSize: 16.0),
       ),
     );
+  }
+
+  Widget _customWidget(int index, String desc) {
+    if (desc.toLowerCase().contains('suggested usage')) {
+      return usageTile(desc);
+    } else if (index == 0) {
+      return _customListTile('By', desc);
+    } else if (index == 1) {
+      return _customListTile('Price', 'USD ' + desc);
+    } else if (index == 2) {
+      return _customListTile('Loved by', desc + ' people');
+    } else if (index == 3) {
+      return detailsTile('About', desc);
+    } else if (index == 4) {
+      return detailsTile('Shop', desc);
+    } else {
+      return ingredientsTile(desc);
+    }
   }
 
   Widget _buildBottomList(BuildContext context, DocumentSnapshot document) {
@@ -236,27 +236,22 @@ class _ResultsPageState extends State<ResultsPage> {
     if (document['price'] == null) {
       price = 'not available';
     }
-    List<String> itemInfo = [document['brand'], price, document['loves']];
-    for (dynamic d in document['details']) {
-      itemInfo.add(d.toString());
-    }
-    itemInfo.add('comments');
-
-    List<String> item = [
-      'By',
-      'Price',
-      'Number of loves',
-      'Details',
-      'Details',
-      'Details',
-      'Comments'
+    List<String> itemInfo = [
+      document['brand'],
+      price,
+      document['loves'],
+      document['details'][0],
+      document['url']
     ];
+    for (int i = 1; i < document['details'].length; i++) {
+      itemInfo.add(document['details'][i].toString());
+    }
 
     return new Expanded(
         child: ListView.builder(
       itemCount: itemInfo.length,
       itemBuilder: (context, index) {
-        return _customListTile(index, item[index], itemInfo[index]);
+        return _customWidget(index, itemInfo[index]);
       },
     ));
   }
@@ -271,7 +266,10 @@ class _ResultsPageState extends State<ResultsPage> {
             .where("name", isEqualTo: widget.query)
             .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Text('Loading...');
+          if (!snapshot.hasData)
+            return Padding(
+                padding: EdgeInsets.all(50.0),
+                child: LinearProgressIndicator());
           return _buildTitle(context, snapshot.data.documents[0]);
         });
 
@@ -324,14 +322,5 @@ class _ResultsPageState extends State<ResultsPage> {
     );
 
     return body;
-  }
-
-  void writeComment(String item) {
-    var map = new Map<String, dynamic>();
-    map['item'] = item;
-    map['user'] = profileName;
-    map['comment'] = comment.text;
-    map['timestamp'] = new Timestamp.now();
-    Firestore.instance.collection('Comment').add(map);
   }
 }
