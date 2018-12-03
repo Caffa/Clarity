@@ -166,16 +166,17 @@ class TabsState extends State<Tabs> {
               })
         ]),
         backgroundColor: Colors.indigo,
-        actions: <Widget>[
-          new IconButton(
-              icon: new Icon(
-                Icons.send,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                _handleSearchSend(searchQuery.text);
-              })
-        ]);
+        // actions: <Widget>[
+        //   new IconButton(
+        //       icon: new Icon(
+        //         Icons.send,
+        //         color: Colors.white,
+        //       ),
+        //       onPressed: () {
+        //         _handleSearchSend(searchQuery.text);
+        //       })
+        // ]
+        );
   }
 
   void _handleSearchEnd() {
