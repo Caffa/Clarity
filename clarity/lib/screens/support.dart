@@ -85,7 +85,7 @@ Widget _buildBottomPart(double _imageHeight) {
               child: _customListTile('Email', 'clarityslyfe@gmail.com')),
           new Padding(
               padding: const EdgeInsets.only(left: 40.0),
-              child: _customListTile('Site', 'clarityslyfe.wixsite.com/home')),
+              child: _customListTile('Site', 'www.clarityslyfe.com')),
           new Padding(
               padding: const EdgeInsets.only(left: 40.0),
               child: _customListTile('Campaign', 'http://kck.st/2DK68bX')),
